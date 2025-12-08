@@ -7,9 +7,8 @@ import requests
 from datetime import datetime, timedelta
 import time
 
-# Stadium coordinates (EXPANDED TO 20 CITIES)
+# Stadium coordinates 
 STADIUMS = {
-    # Original 10 cities
     'Ann Arbor': {'lat': 42.2808, 'lon': -83.7430},
     'Columbus': {'lat': 40.0012, 'lon': -83.0302},
     'State College': {'lat': 40.7982, 'lon': -77.8599},
@@ -20,20 +19,21 @@ STADIUMS = {
     'Tuscaloosa': {'lat': 33.2098, 'lon': -87.5692},
     'Athens': {'lat': 33.9519, 'lon': -83.3576},
     'Baton Rouge': {'lat': 30.4515, 'lon': -91.1871},
-    
-    # Big Ten additions (Midwest)
     'East Lansing': {'lat': 42.7370, 'lon': -84.4839},
     'Lincoln': {'lat': 40.8136, 'lon': -96.7026},
     'Champaign': {'lat': 40.1164, 'lon': -88.2434},
     'West Lafayette': {'lat': 40.4259, 'lon': -86.9081},
     'Bloomington': {'lat': 39.1653, 'lon': -86.5264},
-    
-    # SEC/Big 12 additions (South)
     'Knoxville': {'lat': 35.9606, 'lon': -83.9207},
     'Auburn': {'lat': 32.5990, 'lon': -85.4808},
     'College Station': {'lat': 30.6280, 'lon': -96.3344},
     'Starkville': {'lat': 33.4504, 'lon': -88.8184},
     'Columbia': {'lat': 34.0007, 'lon': -81.0348},
+    'Gainesville': {'lat': 29.6516, 'lon': -82.3248},  # Florida
+    'Tallahassee': {'lat': 30.4383, 'lon': -84.2807},  # Florida State
+    'Blacksburg': {'lat': 37.2296, 'lon': -80.4139},  # Virginia Tech
+    'Clemson': {'lat': 34.6834, 'lon': -82.8374},  # Clemson
+    'Atlanta': {'lat': 33.7756, 'lon': -84.3963},  # Georgia Tech
 }
 
 def get_weather_from_api(lat, lon, date):
@@ -132,7 +132,7 @@ def store_weather_data():
     print(f"{'='*60}")
     print(f"Current records in database: {actual_count}")
     print(f"Unique date-location combinations: {len(existing)}")
-    print(f"Total cities: {len(STADIUMS)} (expanded list)")
+    print(f"Total cities: {len(STADIUMS)} cities")
     print(f"{'='*60}\n")
     
     # Generate Saturdays during football season (Sep-Nov 2024)

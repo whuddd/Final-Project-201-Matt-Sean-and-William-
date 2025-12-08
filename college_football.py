@@ -7,9 +7,8 @@ import requests
 from config import COLLEGE_FOOTBALL_KEY
 import time
 
-# Map EXACT stadium names to our weather cities (EXPANDED TO 20 STADIUMS)
+# Map EXACT stadium names to our weather cities (EXPANDED TO 25 STADIUMS)
 STADIUM_TO_CITY = {
-    # Original 10 stadiums
     'Michigan Stadium': 'Ann Arbor',
     'Ohio Stadium': 'Columbus',
     'Beaver Stadium': 'State College',
@@ -20,20 +19,21 @@ STADIUM_TO_CITY = {
     'Bryant-Denny Stadium': 'Tuscaloosa',
     'Sanford Stadium': 'Athens',
     'Tiger Stadium (LA)': 'Baton Rouge',
-    
-    # Big Ten additions (Midwest)
     'Spartan Stadium': 'East Lansing',
     'Memorial Stadium (Lincoln, NE)': 'Lincoln',
     'Memorial Stadium (Champaign, IL)': 'Champaign',
     'Ross-Ade Stadium': 'West Lafayette',
     'Memorial Stadium (Bloomington, IN)': 'Bloomington',
-    
-    # SEC/Big 12 additions (South)
     'Neyland Stadium': 'Knoxville',
     'Jordan-Hare Stadium': 'Auburn',
     'Kyle Field': 'College Station',
     'Davis Wade Stadium': 'Starkville',
     'Williams-Brice Stadium': 'Columbia',
+    'Ben Hill Griffin Stadium': 'Gainesville',  # Florida
+    'Doak Campbell Stadium': 'Tallahassee',  # Florida State
+    'Lane Stadium': 'Blacksburg',  # Virginia Tech
+    'Memorial Stadium (Clemson, SC)': 'Clemson',  # Clemson
+    'Bobby Dodd Stadium': 'Atlanta',  # Georgia Tech
 }
 
 def get_or_create_team(cursor, team_name, conference="Unknown", city="Unknown"):
@@ -147,7 +147,7 @@ def store_football_data():
     print(f"FOOTBALL DATA COLLECTION - 2024 SEASON")
     print(f"{'='*60}")
     print(f"Current games: {actual_count}")
-    print(f"Target stadiums: {len(STADIUM_TO_CITY)} (expanded list)")
+    print(f"Target stadiums: {len(STADIUM_TO_CITY)} stadiums")
     print(f"{'='*60}\n")
     
     stored_count = 0
