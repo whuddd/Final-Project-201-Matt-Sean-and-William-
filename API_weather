@@ -42,8 +42,8 @@ if __name__ == "__main__":
     # 🔹 You can change these values if you want different dates or location
     lat = 42.2808       # Example: Ann Arbor, MI
     lon = -83.7430
-    start_date = "2023-01-01"   # YYYY-MM-DD
-    end_date = "2023-01-03"     # YYYY-MM-DD
+    start_date = "2025-09-06"   # YYYY-MM-DD
+    end_date = "2025-12-6"     # YYYY-MM-DD
 
     data = get_temp_and_wind(lat, lon, start_date, end_date)
     print_temp_and_wind(data)
