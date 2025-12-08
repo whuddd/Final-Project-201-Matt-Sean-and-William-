@@ -1,10 +1,15 @@
+# weather_data.py
+# Matt - Weather Data Collection
+# Run this 4+ times to collect 100+ weather records
+
 import sqlite3
 import requests
 from datetime import datetime, timedelta
 import time
 
-# Stadium coordinates (major college football cities)
+# Stadium coordinates (EXPANDED TO 20 CITIES)
 STADIUMS = {
+    # Original 10 cities
     'Ann Arbor': {'lat': 42.2808, 'lon': -83.7430},
     'Columbus': {'lat': 40.0012, 'lon': -83.0302},
     'State College': {'lat': 40.7982, 'lon': -77.8599},
@@ -15,6 +20,20 @@ STADIUMS = {
     'Tuscaloosa': {'lat': 33.2098, 'lon': -87.5692},
     'Athens': {'lat': 33.9519, 'lon': -83.3576},
     'Baton Rouge': {'lat': 30.4515, 'lon': -91.1871},
+    
+    # Big Ten additions (Midwest)
+    'East Lansing': {'lat': 42.7370, 'lon': -84.4839},
+    'Lincoln': {'lat': 40.8136, 'lon': -96.7026},
+    'Champaign': {'lat': 40.1164, 'lon': -88.2434},
+    'West Lafayette': {'lat': 40.4259, 'lon': -86.9081},
+    'Bloomington': {'lat': 39.1653, 'lon': -86.5264},
+    
+    # SEC/Big 12 additions (South)
+    'Knoxville': {'lat': 35.9606, 'lon': -83.9207},
+    'Auburn': {'lat': 32.5990, 'lon': -85.4808},
+    'College Station': {'lat': 30.6280, 'lon': -96.3344},
+    'Starkville': {'lat': 33.4504, 'lon': -88.8184},
+    'Columbia': {'lat': 34.0007, 'lon': -81.0348},
 }
 
 def get_weather_from_api(lat, lon, date):
@@ -58,11 +77,40 @@ def get_weather_from_api(lat, lon, date):
                 'weather_code': hourly['weather_code'][game_hour_index]
             }
         else:
-            print(f"  Error {response.status_code}")
             return None
     except Exception as e:
-        print(f"  Exception: {e}")
         return None
+
+def show_database_stats():
+    """
+    Show current database statistics
+    """
+    conn = sqlite3.connect('football_weather.db')
+    cursor = conn.cursor()
+    
+    # Total count
+    cursor.execute("SELECT COUNT(*) FROM Weather")
+    total = cursor.fetchone()[0]
+    
+    # Count by location
+    cursor.execute("""
+        SELECT location, COUNT(*) 
+        FROM Weather 
+        GROUP BY location 
+        ORDER BY COUNT(*) DESC
+    """)
+    by_location = cursor.fetchall()
+    
+    print("\n" + "="*60)
+    print("DATABASE STATISTICS")
+    print("="*60)
+    print(f"Total weather records: {total}")
+    print("\nRecords by location:")
+    for location, count in by_location:
+        print(f"  {location}: {count}")
+    
+    conn.close()
+    return total
 
 def store_weather_data():
     """
@@ -71,15 +119,21 @@ def store_weather_data():
     conn = sqlite3.connect('football_weather.db')
     cursor = conn.cursor()
     
-    # Check current count
+    # Verify actual count
     cursor.execute("SELECT COUNT(*) FROM Weather")
-    current_count = cursor.fetchone()[0]
-    print(f"Current weather records in database: {current_count}")
+    actual_count = cursor.fetchone()[0]
     
     # Check existing records
     cursor.execute("SELECT game_date, location FROM Weather")
     existing = set(cursor.fetchall())
-    print(f"Already have {len(existing)} unique date-location combinations")
+    
+    print(f"\n{'='*60}")
+    print(f"WEATHER DATA COLLECTION - 2024 SEASON")
+    print(f"{'='*60}")
+    print(f"Current records in database: {actual_count}")
+    print(f"Unique date-location combinations: {len(existing)}")
+    print(f"Total cities: {len(STADIUMS)} (expanded list)")
+    print(f"{'='*60}\n")
     
     # Generate Saturdays during football season (Sep-Nov 2024)
     start_date = datetime(2024, 9, 1)
@@ -92,6 +146,9 @@ def store_weather_data():
             saturdays.append(current.strftime('%Y-%m-%d'))
         current += timedelta(days=1)
     
+    print(f"Total Saturdays in season: {len(saturdays)}")
+    print(f"Maximum possible combinations: {len(saturdays) * len(STADIUMS)}")
+    
     # CREATE LIST OF ALL POSSIBLE COMBINATIONS
     all_combinations = []
     for city, coords in STADIUMS.items():
@@ -99,51 +156,81 @@ def store_weather_data():
             if (date, city) not in existing:
                 all_combinations.append((date, city, coords))
     
-    print(f"Found {len(all_combinations)} new date-location combinations to collect")
+    print(f"New combinations available to collect: {len(all_combinations)}")
+    print(f"{'='*60}\n")
     
     if len(all_combinations) == 0:
-        print("⚠️  No new data to collect! All combinations already in database.")
+        print("⚠️  No new data to collect!")
+        print("All possible date-location combinations are already in the database.")
+        show_database_stats()
         conn.close()
         return
     
     stored_count = 0
+    failed_count = 0
     
     # Collect data from the list of new combinations
     for date, city, coords in all_combinations:
         if stored_count >= 25:
+            print(f"\n✓ Reached 25-item limit for this run")
             break
         
-        print(f"Fetching historical weather for {city} on {date}...")
+        print(f"[{stored_count + 1}/25] Fetching {city} on {date}...", end=" ")
         weather = get_weather_from_api(coords['lat'], coords['lon'], date)
         
         if weather:
-            cursor.execute('''
-                INSERT INTO Weather 
-                (game_date, location, temperature, wind_speed, 
-                 humidity, precipitation, weather_code)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (date, city, weather['temperature'], weather['wind_speed'],
-                  weather['humidity'], weather['precipitation'], 
-                  weather['weather_code']))
-            
-            stored_count += 1
-            print(f"  ✓ Stored: {city} - Temp: {weather['temperature']:.1f}°F, Wind: {weather['wind_speed']:.1f} mph")
+            try:
+                cursor.execute('''
+                    INSERT INTO Weather 
+                    (game_date, location, temperature, wind_speed, 
+                     humidity, precipitation, weather_code)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (date, city, weather['temperature'], weather['wind_speed'],
+                      weather['humidity'], weather['precipitation'], 
+                      weather['weather_code']))
+                
+                stored_count += 1
+                print(f"✓ {weather['temperature']:.1f}°F")
+            except sqlite3.IntegrityError as e:
+                print(f"✗ Duplicate (skipping)")
+                failed_count += 1
+        else:
+            print(f"✗ No data")
+            failed_count += 1
         
         # Small delay to be nice to the API
         time.sleep(0.5)
     
     conn.commit()
+    
+    # Verify final count
+    cursor.execute("SELECT COUNT(*) FROM Weather")
+    final_count = cursor.fetchone()[0]
+    
     conn.close()
     
-    total = current_count + stored_count
-    remaining = len(all_combinations) - stored_count
-    
     print(f"\n{'='*60}")
-    print(f"✅ Stored {stored_count} new weather records")
-    print(f"📊 Total weather records: {total}")
-    print(f"🔄 Remaining combinations: {remaining}")
-    print(f"🔄 Need to run {max(0, remaining // 25 + (1 if remaining % 25 else 0))} more times to collect all available data")
+    print(f"COLLECTION COMPLETE")
+    print(f"{'='*60}")
+    print(f"New records added: {stored_count}")
+    print(f"Failed attempts: {failed_count}")
+    print(f"Previous total: {actual_count}")
+    print(f"New total: {final_count}")
+    print(f"Difference: {final_count - actual_count}")
+    
+    remaining = len(all_combinations) - stored_count
+    print(f"\nRemaining combinations: {remaining}")
+    
+    if remaining > 0:
+        runs_needed = (remaining // 25) + (1 if remaining % 25 else 0)
+        print(f"Estimated runs needed: {runs_needed}")
+    else:
+        print("✅ All data collected!")
+    
     print(f"{'='*60}\n")
+    
+    # Show breakdown
+    show_database_stats()
 
 if __name__ == '__main__':
     store_weather_data()

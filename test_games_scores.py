@@ -7,9 +7,8 @@ import requests
 from config import COLLEGE_FOOTBALL_KEY
 import time
 
-# Map EXACT stadium names to our weather cities (EXPANDED TO 20 STADIUMS)
+# Map EXACT stadium names to our weather cities
 STADIUM_TO_CITY = {
-    # Original 10 stadiums
     'Michigan Stadium': 'Ann Arbor',
     'Ohio Stadium': 'Columbus',
     'Beaver Stadium': 'State College',
@@ -20,20 +19,6 @@ STADIUM_TO_CITY = {
     'Bryant-Denny Stadium': 'Tuscaloosa',
     'Sanford Stadium': 'Athens',
     'Tiger Stadium (LA)': 'Baton Rouge',
-    
-    # Big Ten additions (Midwest)
-    'Spartan Stadium': 'East Lansing',
-    'Memorial Stadium (Lincoln, NE)': 'Lincoln',
-    'Memorial Stadium (Champaign, IL)': 'Champaign',
-    'Ross-Ade Stadium': 'West Lafayette',
-    'Memorial Stadium (Bloomington, IN)': 'Bloomington',
-    
-    # SEC/Big 12 additions (South)
-    'Neyland Stadium': 'Knoxville',
-    'Jordan-Hare Stadium': 'Auburn',
-    'Kyle Field': 'College Station',
-    'Davis Wade Stadium': 'Starkville',
-    'Williams-Brice Stadium': 'Columbia',
 }
 
 def get_or_create_team(cursor, team_name, conference="Unknown", city="Unknown"):
@@ -50,7 +35,7 @@ def get_or_create_team(cursor, team_name, conference="Unknown", city="Unknown"):
         )
         return cursor.lastrowid
 
-def get_games_from_api(year=2024, week=1):
+def get_games_from_api(year=2023, week=1):
     """Get games from CollegeFootballData API"""
     url = "https://api.collegefootballdata.com/games"
     
@@ -133,7 +118,7 @@ def show_database_stats():
     return total_games
 
 def store_football_data():
-    """Store up to 25 games per run from 2024 season"""
+    """Store up to 25 games per run from 2023 season"""
     conn = sqlite3.connect('football_weather.db')
     cursor = conn.cursor()
     
@@ -144,10 +129,10 @@ def store_football_data():
     existing_game_ids = set(row[0] for row in cursor.fetchall())
     
     print(f"\n{'='*60}")
-    print(f"FOOTBALL DATA COLLECTION - 2024 SEASON")
+    print(f"FOOTBALL DATA COLLECTION - 2023 SEASON")
     print(f"{'='*60}")
     print(f"Current games: {actual_count}")
-    print(f"Target stadiums: {len(STADIUM_TO_CITY)} (expanded list)")
+    print(f"Target stadiums: {len(STADIUM_TO_CITY)}")
     print(f"{'='*60}\n")
     
     stored_count = 0
@@ -161,7 +146,7 @@ def store_football_data():
             break
         
         print(f"Week {week}...", end=" ")
-        games = get_games_from_api(2024, week)
+        games = get_games_from_api(2023, week)
         
         if not games:
             print("No games")
@@ -172,6 +157,7 @@ def store_football_data():
         for g in games:
             venue_name = g.get('venue', '')
             city = get_city_from_venue(venue_name)
+            # FIXED: Check top-level homePoints
             if city and g.get('homePoints') is not None:
                 valid_games += 1
         
@@ -186,7 +172,7 @@ def store_football_data():
                 skipped_count += 1
                 continue
             
-            # Get venue as string directly
+            # FIXED: Get venue as string directly
             venue_name = game.get('venue', '')
             stadium_city = get_city_from_venue(venue_name)
             
@@ -194,7 +180,7 @@ def store_football_data():
                 wrong_venue_count += 1
                 continue
             
-            # Get scores from top level
+            # FIXED: Get scores from top level
             home_score = game.get('homePoints')
             away_score = game.get('awayPoints')
             
@@ -202,7 +188,7 @@ def store_football_data():
                 no_score_count += 1
                 continue
             
-            # Get team info from top level
+            # FIXED: Get team info from top level
             home_team = game.get('homeTeam', 'Unknown')
             away_team = game.get('awayTeam', 'Unknown')
             home_conference = game.get('homeConference', 'Unknown')
