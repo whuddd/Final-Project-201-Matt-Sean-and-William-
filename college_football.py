@@ -209,7 +209,11 @@ def store_football_data():
             away_conference = game.get('awayConference', 'Unknown')
             
             # Extract game date
-            game_date = game.get('startDate', '')[:10]
+            start_date = game.get('startDate', '')
+            game_date = start_date[:10]
+            kickoff_time = start_date[11:19] if len(start_date) >= 19 else None
+            attendance = game.get('attendance')
+
             
             # Get or create team IDs
             home_team_id = get_or_create_team(cursor, home_team, home_conference, stadium_city)
@@ -220,10 +224,15 @@ def store_football_data():
                 cursor.execute('''
                     INSERT INTO Games 
                     (game_id, game_date, home_team_id, away_team_id, 
-                     home_score, away_score, stadium_city)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                ''', (game_id, game_date, home_team_id, away_team_id,
-                      home_score, away_score, stadium_city))
+                    home_score, away_score, stadium_city,
+                    attendance, kickoff_time)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    game_id, game_date, home_team_id, away_team_id,
+                    home_score, away_score, stadium_city,
+                    attendance, kickoff_time
+                ))
+
                 
                 stored_count += 1
                 total = home_score + away_score
