@@ -33,6 +33,8 @@ def create_database():
             home_score INTEGER,
             away_score INTEGER,
             stadium_city TEXT,
+            attendance INTEGER,
+            kickoff_time TEXT,
             FOREIGN KEY (home_team_id) REFERENCES Teams(team_id),
             FOREIGN KEY (away_team_id) REFERENCES Teams(team_id)
         )
