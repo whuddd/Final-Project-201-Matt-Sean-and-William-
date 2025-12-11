@@ -262,9 +262,8 @@ def main(save_csv=False):
     else:
         print('No correlation data available')
 
-    if save_csv:
-        export_csvs(joined, by_temp, by_wind_precip, corr, by_moon, by_rain)
-        print('\nCSV outputs written to outputs/*.')
+    export_csvs(joined, by_temp, by_wind_precip, corr, by_moon, by_rain)
+    print('\nCSV outputs written to outputs/*.')
 
 
 if __name__ == '__main__':
