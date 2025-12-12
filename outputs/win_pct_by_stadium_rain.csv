@@ -1,0 +1,38 @@
+stadium_city,rainy,num_games,num_wins,win_pct
+Ann Arbor,False,7,5,0.7142857142857143
+Ann Arbor,True,1,1,1.0
+Athens,False,5,5,1.0
+Athens,True,1,1,1.0
+Atlanta,False,4,4,1.0
+Atlanta,True,1,1,1.0
+Auburn,False,7,3,0.42857142857142855
+Auburn,True,1,1,1.0
+Austin,False,7,6,0.8571428571428571
+Baton Rouge,False,6,5,0.8333333333333334
+Baton Rouge,True,1,1,1.0
+Blacksburg,False,18,11,0.6111111111111112
+Bloomington,False,7,7,1.0
+Bloomington,True,1,1,1.0
+Champaign,False,7,6,0.8571428571428571
+Clemson,False,7,5,0.7142857142857143
+College Station,False,7,5,0.7142857142857143
+Columbia,False,7,5,0.7142857142857143
+Columbus,False,8,7,0.875
+East Lansing,False,6,4,0.6666666666666666
+East Lansing,True,1,0,0.0
+Eugene,False,7,7,1.0
+Gainesville,False,5,4,0.8
+Gainesville,True,2,1,0.5
+Iowa City,False,7,6,0.8571428571428571
+Knoxville,False,7,7,1.0
+Lincoln,False,7,5,0.7142857142857143
+Madison,False,7,3,0.42857142857142855
+Starkville,False,7,2,0.2857142857142857
+State College,False,6,5,0.8333333333333334
+State College,True,1,1,1.0
+Tallahassee,False,6,2,0.3333333333333333
+Tallahassee,True,1,0,0.0
+Tuscaloosa,False,6,6,1.0
+Tuscaloosa,True,1,1,1.0
+West Lafayette,False,5,1,0.2
+West Lafayette,True,1,0,0.0

@@ -14,95 +14,39 @@ import numpy as np
 from utils import connect_db, normalize_location, ensure_outputs_dir
 
 
-def load_tables(conn):
-    """Load relevant tables into pandas DataFrames."""
-    tables = {}
-    tables['Teams'] = pd.read_sql_query('SELECT * FROM Teams', conn)
-    tables['Games'] = pd.read_sql_query('SELECT * FROM Games', conn)
 
-    # Some optional tables may be missing; handle gracefully
-    for name in ['Weather', 'AirQuality', 'Moon_Data', 'UV_Data']:
-        try:
-            tables[name] = pd.read_sql_query(f'SELECT * FROM {name}', conn)
-        except Exception:
-            tables[name] = pd.DataFrame()
-
-    return tables
-
-
-def normalize_tables(tables: dict):
-    """Add normalized location keys to tables for reliable joins."""
-    if 'Games' in tables and not tables['Games'].empty:
-        games = tables['Games']
-        games['stadium_city_norm'] = games['stadium_city'].apply(normalize_location)
-        tables['Games'] = games
-
-    for tbl in ['Weather', 'AirQuality', 'Moon_Data', 'UV_Data']:
-        df = tables.get(tbl)
-        if df is not None and not df.empty and 'location' in df.columns:
-            df['location_norm'] = df['location'].apply(normalize_location)
-            tables[tbl] = df
-
-    return tables
-
-
-def build_joined_dataset(tables: dict):
-    """Join Games + Teams + Weather + AirQuality + Moon_Data into one DataFrame.
-
-    Keys: game_date and normalized location (stadium_city_norm == location_norm).
+def load_data_with_sql_join(conn):
     """
-    games = tables['Games'].copy()
-    teams = tables['Teams'].copy()
+    Load data using a SQL JOIN to satisfy Project Requirement #6.
+    Joins Games, Teams, Weather, and Moon_Data.
+    """
+    query = """
+    SELECT 
+        g.game_date,
+        g.stadium_city,
+        g.home_score,
+        g.away_score,
+        -- FIX: Calculate total_points on the fly because the column doesn't exist
+        (g.home_score + g.away_score) AS total_points,
+        g.attendance,
+        t_home.team_name AS home_team_name,
+        t_away.team_name AS away_team_name,
+        w.temperature,
+        w.wind_speed,
+        w.precipitation,
+        m.moon_illumination,
+        m.moon_phase
+    FROM Games g
+    -- JOIN 1 & 2: Link Games to Teams (Shared Integer Key)
+    JOIN Teams t_home ON g.home_team_id = t_home.team_id
+    JOIN Teams t_away ON g.away_team_id = t_away.team_id
+    -- JOIN 3: Link Games to Weather (Shared String Key + Date)
+    LEFT JOIN Weather w ON g.game_date = w.game_date AND g.stadium_city = w.location
+    -- JOIN 4: Link Games to Moon Data (Shared String Key + Date)
+    LEFT JOIN Moon_Data m ON g.game_date = m.game_date AND g.stadium_city = m.location
+    """
+    return pd.read_sql_query(query, conn)
 
-    # Merge home team name
-    teams_home = teams.rename(columns={'team_id': 'home_team_id', 'team_name': 'home_team_name'})
-    games = games.merge(teams_home[['home_team_id', 'home_team_name']], on='home_team_id', how='left')
-
-    # Merge away team name
-    teams_away = teams.rename(columns={'team_id': 'away_team_id', 'team_name': 'away_team_name'})
-    games = games.merge(teams_away[['away_team_id', 'away_team_name']], on='away_team_id', how='left')
-
-    # Prepare weather-like tables
-    weather = tables.get('Weather', pd.DataFrame())
-    air = tables.get('AirQuality', pd.DataFrame())
-    moon = tables.get('Moon_Data', pd.DataFrame())
-
-    # Extract US_AQI (pollutant_type == 'US_AQI') if present
-    if not air.empty and 'pollutant_type' in air.columns:
-        aqi = air[air['pollutant_type'] == 'US_AQI'][['game_date', 'location_norm', 'pollutant_value']].copy()
-        aqi = aqi.rename(columns={'pollutant_value': 'us_aqi'})
-    else:
-        aqi = pd.DataFrame()
-
-    # Normalize date columns as strings
-    games['game_date'] = games['game_date'].astype(str)
-    if not weather.empty:
-        weather['game_date'] = weather['game_date'].astype(str)
-    if not aqi.empty:
-        aqi['game_date'] = aqi['game_date'].astype(str)
-    if not moon.empty:
-        moon['game_date'] = moon['game_date'].astype(str)
-
-    # Merge weather
-    joined = games.merge(weather, left_on=['game_date', 'stadium_city_norm'], right_on=['game_date', 'location_norm'], how='left', suffixes=('', '_weather'))
-
-    # Merge AQI
-    if not aqi.empty:
-        joined = joined.merge(aqi, left_on=['game_date', 'stadium_city_norm'], right_on=['game_date', 'location_norm'], how='left')
-    else:
-        joined['us_aqi'] = np.nan
-
-    # Merge Moon data
-    if not moon.empty:
-        joined = joined.merge(moon, left_on=['game_date', 'stadium_city_norm'], right_on=['game_date', 'location_norm'], how='left', suffixes=('', '_moon'))
-
-    # Compute useful fields
-    joined['home_score'] = pd.to_numeric(joined.get('home_score', joined.get('homePoints', np.nan)), errors='coerce')
-    joined['away_score'] = pd.to_numeric(joined.get('away_score', joined.get('awayPoints', np.nan)), errors='coerce')
-    joined['total_points'] = joined['home_score'].fillna(0) + joined['away_score'].fillna(0)
-    joined['attendance'] = pd.to_numeric(joined.get('attendance', np.nan), errors='coerce')
-
-    return joined
 
 
 def compute_points_by_temperature_bins(joined: pd.DataFrame):
@@ -230,17 +174,25 @@ def export_csvs(joined, by_temp, by_wind_precip, corr, by_moon, by_rain):
 
 def main(save_csv=False):
     conn = connect_db()
-    tables = load_tables(conn)
-    tables = normalize_tables(tables)
-    joined = build_joined_dataset(tables)
+    
+    # --- OLD CODE DELETED ---
+    # tables = load_tables(conn)
+    # tables = normalize_tables(tables)
+    # joined = build_joined_dataset(tables)
+    
+    # --- NEW CODE ADDED ---
+    print("Loading data with SQL JOIN...")
+    joined = load_data_with_sql_join(conn)
 
     if joined.shape[0] == 0:
-        print('ERROR: joined dataset has 0 rows. Verify table contents and normalization.')
+        print('ERROR: joined dataset has 0 rows. Verify database content.')
         return
 
     print(f'Joined rows: {joined.shape[0]}')
-
+    
+    # ... The rest of your main function stays exactly the same ...
     by_temp = compute_points_by_temperature_bins(joined)
+    # etc...
     by_wind_precip = compute_points_by_wind_precip(joined)
     corr = compute_correlation_matrix(joined)
     by_moon = compute_points_by_moon_illumination(joined)

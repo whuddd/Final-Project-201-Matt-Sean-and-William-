@@ -1,0 +1,187 @@
+game_date,stadium_city,home_score,away_score,total_points,attendance,home_team_name,away_team_name,temperature,wind_speed,precipitation,moon_illumination,moon_phase
+2024-08-31,Tuscaloosa,63,0,63,100077.0,Alabama,Western Kentucky,,,,,
+2024-08-31,Auburn,73,3,76,88043.0,Auburn,Alabama A&M,,,,,
+2024-08-31,Gainesville,17,41,58,90544.0,Florida,Miami,,,,,
+2024-08-31,Starkville,56,7,63,48724.0,Mississippi State,Eastern Kentucky,,,,,
+2024-08-31,Columbia,23,19,42,78496.0,South Carolina,Old Dominion,,,,,
+2024-08-31,Knoxville,69,3,72,101915.0,Tennessee,Chattanooga,,,,,
+2024-08-31,Austin,52,0,52,99171.0,Texas,Colorado State,,,,,
+2024-08-31,College Station,13,23,36,,Texas A&M,Notre Dame,,,,,
+2024-09-07,Tuscaloosa,42,16,58,100077.0,Alabama,South Florida,83.6,7.7,0.004,19.24,WAXING_CRESCENT
+2024-09-07,Auburn,14,21,35,88043.0,Auburn,California,84.6,3.2,0.0,19.26,WAXING_CRESCENT
+2024-09-07,Gainesville,45,7,52,89295.0,Florida,Samford,81.8,2.0,0.0,19.27,WAXING_CRESCENT
+2024-09-07,Athens,48,3,51,93033.0,Georgia,Tennessee Tech,87.5,2.9,0.0,19.24,WAXING_CRESCENT
+2024-09-07,Baton Rouge,44,21,65,100242.0,LSU,Nicholls,80.9,12.3,0.004,19.24,WAXING_CRESCENT
+2024-09-07,Ann Arbor,12,31,43,111170.0,Michigan,Texas,58.2,13.7,0.0,19.22,WAXING_CRESCENT
+2024-09-07,College Station,52,10,62,92345.0,Texas A&M,McNeese,86.6,17.3,0.0,19.26,WAXING_CRESCENT
+2024-09-14,Madison,10,42,52,76323.0,Wisconsin,Alabama,81.2,7.3,0.0,85.49,WAXING_GIBBOUS
+2024-09-14,Auburn,45,19,64,88043.0,Auburn,New Mexico,71.0,8.5,0.508,85.52,WAXING_GIBBOUS
+2024-09-14,Gainesville,20,33,53,89993.0,Florida,Texas A&M,76.0,6.7,0.236,85.53,WAXING_GIBBOUS
+2024-09-14,Starkville,17,41,58,47412.0,Mississippi State,Toledo,79.6,2.3,0.0,85.52,WAXING_GIBBOUS
+2024-09-14,Columbia,33,36,69,79531.0,South Carolina,LSU,81.9,16.3,0.0,85.53,WAXING_GIBBOUS
+2024-09-14,Knoxville,71,0,71,101915.0,Tennessee,Kent State,86.9,10.6,0.0,85.52,WAXING_GIBBOUS
+2024-09-14,Austin,56,7,63,101892.0,Texas,UTSA,91.6,6.5,0.0,85.49,WAXING_GIBBOUS
+2024-09-21,Auburn,14,24,38,88043.0,Auburn,Arkansas,84.6,0.9,0.0,-80.3,WANING_GIBBOUS
+2024-09-21,Baton Rouge,34,17,51,100315.0,LSU,UCLA,88.0,4.7,0.0,-80.32,WANING_GIBBOUS
+2024-09-21,Starkville,28,45,73,49655.0,Mississippi State,Florida,89.3,4.0,0.0,-80.29,WANING_GIBBOUS
+2024-09-21,Columbia,50,7,57,78704.0,South Carolina,Akron,83.1,3.1,0.0,-80.29,WANING_GIBBOUS
+2024-09-22,Austin,51,3,54,102850.0,Texas,UL Monroe,,,,,
+2024-09-21,College Station,26,20,46,99523.0,Texas A&M,Bowling Green,95.6,7.5,0.0,-80.29,WANING_GIBBOUS
+2024-09-28,Tuscaloosa,41,34,75,100077.0,Alabama,Georgia,77.5,11.3,0.0,-13.16,WANING_CRESCENT
+2024-09-28,Auburn,21,27,48,88043.0,Auburn,Oklahoma,77.5,15.8,0.0,-13.14,WANING_CRESCENT
+2024-09-28,Baton Rouge,42,10,52,102143.0,LSU,South Alabama,86.1,8.5,0.0,-13.16,WANING_CRESCENT
+2024-09-28,Austin,35,13,48,101388.0,Texas,Mississippi State,88.3,9.3,0.0,-13.16,WANING_CRESCENT
+2024-10-05,Gainesville,24,13,37,90369.0,Florida,UCF,80.8,8.3,0.012,8.36,WAXING_CRESCENT
+2024-10-05,Athens,31,13,44,93033.0,Georgia,Auburn,81.7,7.0,0.004,8.34,WAXING_CRESCENT
+2024-10-05,Columbia,3,27,30,79837.0,South Carolina,Ole Miss,81.9,6.6,0.0,8.36,WAXING_CRESCENT
+2024-10-05,College Station,41,10,51,97049.0,Texas A&M,Missouri,89.8,9.2,0.0,8.35,WAXING_CRESCENT
+2024-10-12,Tuscaloosa,27,25,52,100077.0,Alabama,South Carolina,79.2,0.8,0.0,72.21,WAXING_GIBBOUS
+2024-10-12,Athens,41,31,72,93033.0,Georgia,Mississippi State,75.7,4.4,0.0,72.21,WAXING_GIBBOUS
+2024-10-12,Baton Rouge,29,26,55,102212.0,LSU,Ole Miss,82.4,0.1,0.0,72.21,WAXING_GIBBOUS
+2024-10-12,Knoxville,23,17,40,101915.0,Tennessee,Florida,71.4,0.9,0.0,72.24,WAXING_GIBBOUS
+2024-10-19,Gainesville,48,20,68,,Florida,Kentucky,75.9,15.2,0.0,-91.63,WANING_GIBBOUS
+2024-10-19,Starkville,24,34,58,50127.0,Mississippi State,Texas A&M,69.9,4.5,0.0,-91.63,WANING_GIBBOUS
+2024-10-19,Knoxville,24,17,41,101915.0,Tennessee,Alabama,67.7,2.9,0.0,-91.64,WANING_GIBBOUS
+2024-10-19,Austin,15,30,45,105215.0,Texas,Georgia,80.7,8.6,0.0,-91.66,WANING_GIBBOUS
+2024-10-26,Tuscaloosa,34,0,34,100077.0,Alabama,Missouri,82.3,4.2,0.0,-25.98,WANING_CRESCENT
+2024-10-26,Starkville,25,58,83,49303.0,Mississippi State,Arkansas,82.7,5.2,0.0,-25.95,WANING_CRESCENT
+2024-10-26,College Station,38,23,61,108852.0,Texas A&M,LSU,87.2,4.6,0.0,-25.95,WANING_CRESCENT
+2024-11-02,Auburn,7,17,24,88043.0,Auburn,Vanderbilt,78.4,4.7,0.0,1.68,NEW_MOON
+2024-11-02,Starkville,45,20,65,48617.0,Mississippi State,Massachusetts,77.5,5.8,0.0,1.68,NEW_MOON
+2024-11-02,Columbia,44,20,64,80298.0,South Carolina,Texas A&M,77.7,4.1,0.0,1.68,NEW_MOON
+2024-11-02,Knoxville,28,18,46,101915.0,Tennessee,Kentucky,70.2,2.3,0.0,1.68,NEW_MOON
+2024-11-10,Baton Rouge,13,42,55,102283.0,LSU,Alabama,,,,,
+2024-11-10,Knoxville,33,14,47,101915.0,Tennessee,Mississippi State,,,,,
+2024-11-09,Austin,49,17,66,103375.0,Texas,Florida,70.1,8.2,0.0,57.42,FIRST_QUARTER
+2024-11-16,Gainesville,27,16,43,90067.0,Florida,LSU,73.7,5.1,0.0,-98.48,FULL_MOON
+2024-11-17,Athens,31,17,48,93033.0,Georgia,Tennessee,,,,,
+2024-11-16,Columbia,34,30,64,79361.0,South Carolina,Missouri,63.8,2.5,0.0,-98.48,FULL_MOON
+2024-11-17,College Station,38,3,41,105815.0,Texas A&M,New Mexico State,,,,,
+2024-11-16,Tuscaloosa,52,7,59,100077.0,Alabama,Mercer,64.9,1.4,0.0,-98.49,FULL_MOON
+2024-11-16,Auburn,48,14,62,88043.0,Auburn,UL Monroe,66.5,2.6,0.0,-98.48,FULL_MOON
+2024-11-24,Auburn,43,41,84,88043.0,Auburn,Texas A&M,,,,,
+2024-11-23,Gainesville,24,17,41,89942.0,Florida,Ole Miss,62.2,6.6,0.0,-41.72,LAST_QUARTER
+2024-11-23,Athens,59,21,80,93033.0,Georgia,Massachusetts,57.8,7.9,0.0,-41.76,LAST_QUARTER
+2024-11-24,Baton Rouge,24,17,41,102086.0,LSU,Vanderbilt,,,,,
+2024-11-23,Starkville,20,39,59,47824.0,Mississippi State,Missouri,54.4,0.7,0.0,-41.73,LAST_QUARTER
+2024-11-23,Columbia,56,12,68,79078.0,South Carolina,Wofford,59.8,4.8,0.0,-41.73,LAST_QUARTER
+2024-11-23,Knoxville,56,0,56,101915.0,Tennessee,UTEP,49.2,3.4,0.0,-41.74,LAST_QUARTER
+2024-11-23,Austin,31,14,45,102811.0,Texas,Kentucky,69.2,6.9,0.0,-41.76,LAST_QUARTER
+2024-11-30,Tuscaloosa,28,14,42,100077.0,Alabama,Auburn,48.1,1.4,0.0,-0.12,NEW_MOON
+2024-12-01,Tallahassee,11,31,42,55107.0,Florida State,Florida,,,,,
+2024-11-30,Athens,44,42,86,93033.0,Georgia,Georgia Tech,47.6,8.2,0.0,-0.12,NEW_MOON
+2024-12-01,Baton Rouge,37,17,54,99364.0,LSU,Oklahoma,,,,,
+2024-11-30,Clemson,14,17,31,81500.0,Clemson,South Carolina,47.7,4.0,0.0,-0.11,NEW_MOON
+2024-12-01,College Station,7,17,24,109028.0,Texas A&M,Texas,,,,,
+2024-08-31,Bloomington,31,7,38,44150.0,Indiana,Florida International,,,,,
+2024-08-31,Iowa City,40,0,40,69250.0,Iowa,Illinois State,,,,,
+2024-08-31,Ann Arbor,30,10,40,110665.0,Michigan,Fresno State,,,,,
+2024-08-30,East Lansing,16,10,26,70271.0,Michigan State,Florida Atlantic,,,,,
+2024-08-31,Lincoln,40,7,47,86072.0,Nebraska,UTEP,,,,,
+2024-08-31,Columbus,52,6,58,102011.0,Ohio State,Akron,,,,,
+2024-08-31,Eugene,24,14,38,57435.0,Oregon,Idaho,,,,,
+2024-08-31,Madison,28,14,42,75158.0,Wisconsin,Western Michigan,,,,,
+2024-09-07,Champaign,23,17,40,60670.0,Illinois,Kansas,64.0,9.2,0.0,19.25,WAXING_CRESCENT
+2024-09-06,Bloomington,77,3,80,39082.0,Indiana,Western Illinois,,,,,
+2024-09-07,Iowa City,19,20,39,69250.0,Iowa,Iowa State,62.5,7.4,0.0,19.23,WAXING_CRESCENT
+2024-09-07,Lincoln,28,10,38,86906.0,Nebraska,Colorado,72.4,4.8,0.0,19.24,WAXING_CRESCENT
+2024-09-07,Columbus,56,0,56,102665.0,Ohio State,Western Michigan,65.2,11.4,0.0,19.23,WAXING_CRESCENT
+2024-09-08,Eugene,37,34,71,58134.0,Oregon,Boise State,,,,,
+2024-09-07,State College,34,27,61,103861.0,Penn State,Bowling Green,68.6,12.7,0.0,19.23,WAXING_CRESCENT
+2024-09-07,Madison,27,13,40,76069.0,Wisconsin,South Dakota,59.1,7.6,0.0,19.23,WAXING_CRESCENT
+2024-09-14,Champaign,30,9,39,,Illinois,Central Michigan,84.1,8.1,0.0,85.51,WAXING_GIBBOUS
+2024-09-14,Iowa City,38,21,59,69250.0,Iowa,Troy,79.9,6.2,0.0,85.49,WAXING_GIBBOUS
+2024-09-14,Ann Arbor,28,18,46,110250.0,Michigan,Arkansas State,80.6,8.1,0.0,85.48,WAXING_GIBBOUS
+2024-09-14,East Lansing,40,0,40,70066.0,Michigan State,Prairie View A&M,83.0,6.9,0.0,85.5,WAXING_GIBBOUS
+2024-09-14,Lincoln,34,3,37,86546.0,Nebraska,Northern Iowa,78.4,7.9,0.0,85.5,WAXING_GIBBOUS
+2024-09-21,Lincoln,24,31,55,86936.0,Nebraska,Illinois,88.6,8.7,0.0,-80.31,WANING_GIBBOUS
+2024-09-21,Bloomington,52,14,66,43109.0,Indiana,Charlotte,88.9,1.7,0.0,-80.3,WANING_GIBBOUS
+2024-09-21,Ann Arbor,27,24,51,110702.0,Michigan,USC,81.1,5.4,0.0,-80.34,WANING_GIBBOUS
+2024-09-21,Columbus,49,14,63,103871.0,Ohio State,Marshall,86.3,6.8,0.0,-80.34,WANING_GIBBOUS
+2024-09-21,State College,56,0,56,109526.0,Penn State,Kent State,80.8,5.3,0.0,-80.33,WANING_GIBBOUS
+2024-09-21,Blacksburg,23,26,49,65632.0,Virginia Tech,Rutgers,83.6,4.4,0.0,-80.26,WANING_GIBBOUS
+2024-09-28,State College,21,7,28,109911.0,Penn State,Illinois,72.0,8.9,0.008,-13.17,WANING_CRESCENT
+2024-09-28,Bloomington,42,28,70,48323.0,Indiana,Maryland,66.0,10.6,0.083,-13.15,WANING_CRESCENT
+2024-09-28,Ann Arbor,27,24,51,110340.0,Michigan,Minnesota,68.7,10.0,0.091,-13.17,WANING_CRESCENT
+2024-09-28,East Lansing,7,38,45,71114.0,Michigan State,Ohio State,68.4,11.6,0.008,-13.16,WANING_CRESCENT
+2024-09-28,West Lafayette,10,28,38,61441.0,Purdue,Nebraska,77.0,13.7,0.004,-13.15,WANING_CRESCENT
+2024-10-05,Columbus,35,7,42,105135.0,Ohio State,Iowa,73.0,4.6,0.0,8.33,WAXING_CRESCENT
+2024-10-05,Eugene,31,10,41,59802.0,Oregon,Michigan State,53.3,2.6,0.0,8.33,WAXING_CRESCENT
+2024-10-05,Lincoln,14,7,21,87464.0,Nebraska,Rutgers,89.3,19.9,0.0,8.34,WAXING_CRESCENT
+2024-10-05,Madison,52,6,58,76091.0,Wisconsin,Purdue,73.3,15.3,0.0,8.33,WAXING_CRESCENT
+2024-10-05,State College,27,11,38,110047.0,Penn State,UCLA,67.4,4.1,0.0,8.33,WAXING_CRESCENT
+2024-10-12,Champaign,50,49,99,55815.0,Illinois,Purdue,77.3,5.7,0.0,72.23,WAXING_GIBBOUS
+2024-10-12,Iowa City,40,16,56,69250.0,Iowa,Washington,76.2,6.8,0.0,72.2,WAXING_GIBBOUS
+2024-10-12,Eugene,32,31,63,60129.0,Oregon,Ohio State,62.4,4.4,0.0,72.21,WAXING_GIBBOUS
+2024-10-19,Champaign,21,7,28,60670.0,Illinois,Michigan,66.8,4.1,0.0,-91.64,WANING_GIBBOUS
+2024-10-19,Bloomington,56,7,63,53082.0,Indiana,Nebraska,67.5,1.9,0.0,-91.64,WANING_GIBBOUS
+2024-10-19,East Lansing,32,20,52,69682.0,Michigan State,Iowa,66.4,5.6,0.0,-91.65,WANING_GIBBOUS
+2024-10-19,West Lafayette,0,35,35,57463.0,Purdue,Oregon,67.1,3.0,0.0,-91.64,WANING_GIBBOUS
+2024-10-26,Eugene,38,9,47,59830.0,Oregon,Illinois,66.1,4.6,0.0,-25.98,WANING_CRESCENT
+2024-10-26,Bloomington,31,17,48,53082.0,Indiana,Washington,61.6,8.1,0.0,-25.96,WANING_CRESCENT
+2024-10-26,Iowa City,40,14,54,69250.0,Iowa,Northwestern,58.0,6.6,0.0,-25.99,WANING_CRESCENT
+2024-10-26,Ann Arbor,24,17,41,110849.0,Michigan,Michigan State,53.1,10.3,0.0,-25.99,WANING_CRESCENT
+2024-10-26,Columbus,21,17,38,104830.0,Ohio State,Nebraska,59.4,8.7,0.0,-25.99,WANING_CRESCENT
+2024-10-26,Madison,13,28,41,76403.0,Wisconsin,Penn State,52.6,5.0,0.0,-25.99,WANING_CRESCENT
+2024-11-02,Champaign,17,25,42,58088.0,Illinois,Minnesota,57.8,6.7,0.0,1.68,NEW_MOON
+2024-11-02,East Lansing,10,47,57,68423.0,Michigan State,Indiana,50.5,1.1,0.0,1.67,NEW_MOON
+2024-11-02,Iowa City,42,10,52,69250.0,Iowa,Wisconsin,54.7,9.3,0.0,1.67,NEW_MOON
+2024-11-02,Ann Arbor,17,38,55,110576.0,Michigan,Oregon,51.6,2.6,0.0,1.67,NEW_MOON
+2024-11-02,Lincoln,20,27,47,87453.0,Nebraska,UCLA,56.2,9.0,0.0,1.68,NEW_MOON
+2024-11-02,West Lafayette,20,26,46,61141.0,Purdue,Northwestern,57.2,5.5,0.0,1.68,NEW_MOON
+2024-11-02,State College,13,20,33,111030.0,Penn State,Ohio State,52.7,5.4,0.0,1.67,NEW_MOON
+2024-11-09,Bloomington,20,15,35,53082.0,Indiana,Michigan,58.2,7.1,0.0,57.45,FIRST_QUARTER
+2024-11-10,Eugene,39,18,57,59245.0,Oregon,Maryland,,,,,
+2024-11-09,Columbus,45,0,45,103463.0,Ohio State,Purdue,56.1,8.2,0.0,57.4,FIRST_QUARTER
+2024-11-10,State College,35,6,41,110233.0,Penn State,Washington,,,,,
+2024-11-16,Champaign,38,16,54,52660.0,Illinois,Michigan State,51.8,9.2,0.0,-98.49,FULL_MOON
+2024-11-17,Madison,13,16,29,76298.0,Wisconsin,Oregon,,,,,
+2024-11-16,West Lafayette,10,49,59,58346.0,Purdue,Penn State,53.0,8.9,0.0,-98.49,FULL_MOON
+2024-11-23,Columbus,38,15,53,105751.0,Ohio State,Indiana,45.2,11.0,0.0,-41.77,LAST_QUARTER
+2024-11-23,Ann Arbor,50,6,56,109830.0,Michigan,Northwestern,45.0,12.0,0.0,-41.78,LAST_QUARTER
+2024-11-23,East Lansing,24,17,41,57558.0,Michigan State,Purdue,43.5,10.9,0.0,-41.75,LAST_QUARTER
+2024-11-23,Lincoln,44,25,69,86923.0,Nebraska,Wisconsin,49.5,7.1,0.0,-41.74,LAST_QUARTER
+2024-11-30,Iowa City,13,10,23,69250.0,Iowa,Nebraska,22.6,7.2,0.0,-0.12,NEW_MOON
+2024-12-01,Bloomington,66,0,66,53082.0,Indiana,Purdue,,,,,
+2024-11-30,State College,44,7,51,104044.0,Penn State,Maryland,27.7,14.1,0.0,-0.12,NEW_MOON
+2024-11-30,Columbus,10,13,23,106005.0,Ohio State,Michigan,28.7,10.1,0.0,-0.12,NEW_MOON
+2024-11-30,East Lansing,14,41,55,50038.0,Michigan State,Rutgers,24.4,13.5,0.0,-0.12,NEW_MOON
+2024-11-29,Madison,7,24,31,76059.0,Wisconsin,Minnesota,,,,,
+2024-12-01,Eugene,49,21,70,59603.0,Oregon,Washington,,,,,
+2024-09-21,Blacksburg,17,24,41,4023.0,Campbell,Stony Brook,83.6,4.4,0.0,-80.26,WANING_GIBBOUS
+2024-09-28,Blacksburg,44,41,85,3269.0,Campbell,Delaware State,72.6,10.1,0.0,-13.12,WANING_CRESCENT
+2024-10-05,Blacksburg,14,45,59,4415.0,Campbell,North Carolina Central,75.5,3.0,0.0,8.37,WAXING_CRESCENT
+2024-10-26,Blacksburg,21,7,28,5591.0,Campbell,North Carolina A&T,62.8,7.4,0.0,-25.92,WANING_CRESCENT
+2024-11-09,Blacksburg,24,27,51,3371.0,Campbell,Richmond,59.0,7.5,0.0,57.49,FIRST_QUARTER
+2024-11-23,Blacksburg,23,45,68,3410.0,Campbell,Towson,42.4,17.8,0.0,-41.7,LAST_QUARTER
+2024-09-14,West Lafayette,7,66,73,61441.0,Purdue,Notre Dame,85.4,8.4,0.0,85.52,WAXING_GIBBOUS
+2024-08-31,West Lafayette,49,0,49,59488.0,Purdue,Indiana State,,,,,
+2024-09-01,Atlanta,35,12,47,40113.0,Georgia Tech,Georgia State,,,,,
+2024-09-02,Tallahassee,13,28,41,51719.0,Florida State,Boston College,,,,,
+2024-10-17,Blacksburg,42,21,63,65632.0,Virginia Tech,Boston College,,,,,
+2024-11-22,Atlanta,30,29,59,34591.0,Georgia Tech,NC State,,,,,
+2024-09-08,Clemson,66,20,86,81500.0,Clemson,App State,,,,,
+2024-09-07,Blacksburg,31,14,45,65632.0,Virginia Tech,Marshall,70.4,10.0,0.0,19.28,WAXING_CRESCENT
+2024-09-14,Tallahassee,12,20,32,55107.0,Florida State,Memphis,83.1,2.0,0.008,85.53,WAXING_GIBBOUS
+2024-09-14,Atlanta,59,7,66,31729.0,Georgia Tech,VMI,74.7,18.2,0.004,85.56,WAXING_GIBBOUS
+2024-09-21,Tallahassee,14,9,23,55107.0,Florida State,California,86.6,6.1,0.0,-80.26,WANING_GIBBOUS
+2024-09-21,Clemson,59,35,94,81500.0,Clemson,NC State,85.3,2.9,0.0,-80.26,WANING_GIBBOUS
+2024-09-28,Clemson,40,14,54,80295.0,Clemson,Stanford,76.4,10.8,0.0,-13.12,WANING_CRESCENT
+2024-10-05,Tallahassee,13,29,42,55107.0,Florida State,Clemson,82.4,8.9,0.0,8.37,WAXING_CRESCENT
+2024-10-06,Atlanta,24,14,38,37287.0,Georgia Tech,Duke,,,,,
+2024-10-19,Clemson,48,31,79,80100.0,Clemson,Virginia,68.2,4.9,0.0,-91.61,WANING_GIBBOUS
+2024-10-26,Blacksburg,21,6,27,65633.0,Virginia Tech,Georgia Tech,62.8,7.4,0.0,-25.92,WANING_CRESCENT
+2024-11-02,Clemson,21,33,54,80446.0,Clemson,Louisville,74.5,5.0,0.0,1.69,NEW_MOON
+2024-11-02,Tallahassee,11,35,46,55107.0,Florida State,North Carolina,81.9,6.0,0.0,1.69,NEW_MOON
+2024-11-09,Blacksburg,14,24,38,65632.0,Virginia Tech,Clemson,59.0,7.5,0.0,57.49,FIRST_QUARTER
+2024-11-09,Atlanta,28,23,51,47358.0,Georgia Tech,Miami,69.3,11.1,0.0,57.5,FIRST_QUARTER
+2024-11-23,Clemson,51,14,65,80300.0,Clemson,The Citadel,59.5,0.6,0.0,-41.69,LAST_QUARTER
+2024-11-23,Tallahassee,41,7,48,43711.0,Florida State,Charleston Southern,60.7,3.9,0.0,-41.7,LAST_QUARTER
+2024-12-01,Blacksburg,37,17,54,65632.0,Virginia Tech,Virginia,,,,,
+2024-08-31,Blacksburg,45,3,48,42272.0,Baylor,Tarleton State,,,,,
+2024-09-14,Blacksburg,31,3,34,46212.0,Baylor,Air Force,74.5,10.1,0.0,85.55,WAXING_GIBBOUS
+2024-09-28,Blacksburg,28,34,62,39583.0,Baylor,BYU,72.6,10.1,0.0,-13.12,WANING_CRESCENT
+2024-10-26,Blacksburg,38,28,66,44987.0,Baylor,Oklahoma State,62.8,7.4,0.0,-25.92,WANING_CRESCENT
+2024-11-03,Blacksburg,37,34,71,44171.0,Baylor,TCU,,,,,
+2024-11-30,Blacksburg,45,17,62,36585.0,Baylor,Kansas,33.4,12.9,0.0,-0.11,NEW_MOON
+2024-08-30,Champaign,45,0,45,43849.0,Illinois,Eastern Illinois,,,,,
