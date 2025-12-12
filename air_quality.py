@@ -80,17 +80,22 @@ def get_air_quality_from_api(lat, lon, date):
         return None
 
 def show_database_stats():
-    """Show current database statistics"""
+    """
+    Show current database statistics
+    """
     conn = sqlite3.connect('football_weather.db')
     cursor = conn.cursor()
     
+    # Total count (Make sure your table is named 'AirQuality')
     cursor.execute("SELECT COUNT(*) FROM AirQuality")
     total = cursor.fetchone()[0]
     
+    # Count by location (CORRECTED: Joins AirQuality and Locations tables)
     cursor.execute("""
-        SELECT location, COUNT(*) 
-        FROM AirQuality 
-        GROUP BY location 
+        SELECT l.city_name, COUNT(*) 
+        FROM AirQuality a
+        JOIN Locations l ON a.location_id = l.location_id
+        GROUP BY l.city_name 
         ORDER BY COUNT(*) DESC
     """)
     by_location = cursor.fetchall()
@@ -99,14 +104,21 @@ def show_database_stats():
     print("DATABASE STATISTICS")
     print("="*60)
     print(f"Total air quality records: {total}")
-    
-    if by_location:
-        print("\nRecords by location:")
-        for location, count in by_location[:10]:  # Top 10
-            print(f"  {location}: {count}")
+    print("\nRecords by location:")
+    for location, count in by_location:
+        print(f"  {location}: {count}")
     
     conn.close()
     return total
+
+def get_or_create_location(cursor, city_name):
+    """Get location_id or create new location"""
+    cursor.execute("SELECT location_id FROM Locations WHERE city_name = ?", (city_name,))
+    result = cursor.fetchone()
+    if result:
+        return result[0]
+    cursor.execute("INSERT INTO Locations (city_name) VALUES (?)", (city_name,))
+    return cursor.lastrowid
 
 def store_air_quality_data():
     """Store up to 25 air quality records per run"""
@@ -116,21 +128,25 @@ def store_air_quality_data():
     cursor.execute("SELECT COUNT(*) FROM AirQuality")
     actual_count = cursor.fetchone()[0]
     
-    cursor.execute("SELECT game_date, location FROM AirQuality")
-    existing = set(cursor.fetchall())
+    # Check existing (Joined with Locations)
+    try:
+        cursor.execute("""
+            SELECT a.game_date, l.city_name 
+            FROM AirQuality a 
+            JOIN Locations l ON a.location_id = l.location_id
+        """)
+        existing = set(cursor.fetchall())
+    except sqlite3.OperationalError:
+        existing = set()
     
     print(f"\n{'='*60}")
-    print(f"AIR QUALITY DATA COLLECTION - 2024 SEASON")
+    print(f"AIR QUALITY DATA COLLECTION")
     print(f"{'='*60}")
     print(f"Current records: {actual_count}")
-    print(f"Total cities: {len(CITIES)}")
-    print(f"Using: Open-Meteo Air Quality API (NO KEY NEEDED!)")
-    print(f"{'='*60}\n")
     
-    # Generate Saturdays during football season (Sep-Nov 2024)
+    # Generate Saturdays
     start_date = datetime(2024, 9, 1)
     end_date = datetime(2024, 11, 30)
-    
     saturdays = []
     current = start_date
     while current <= end_date:
@@ -138,10 +154,6 @@ def store_air_quality_data():
             saturdays.append(current)
         current += timedelta(days=1)
     
-    print(f"Total Saturdays: {len(saturdays)}")
-    print(f"Max combinations: {len(saturdays) * len(CITIES)}")
-    
-    # Create list of all combinations
     all_combinations = []
     for city, coords in CITIES.items():
         for saturday in saturdays:
@@ -150,18 +162,9 @@ def store_air_quality_data():
                 all_combinations.append((date_str, city, coords))
     
     print(f"New combinations available: {len(all_combinations)}")
-    print(f"{'='*60}\n")
-    
-    if len(all_combinations) == 0:
-        print("⚠️  No new data to collect!")
-        show_database_stats()
-        conn.close()
-        return
     
     stored_count = 0
-    failed_count = 0
     
-    # Collect data
     for date, city, coords in all_combinations:
         if stored_count >= 25:
             print(f"\n✓ Reached 25-item limit")
@@ -175,76 +178,49 @@ def store_air_quality_data():
             hourly = aq_data['hourly']
             times = hourly.get('time', [])
             us_aqi = hourly.get('us_aqi', [])
-            pm25 = hourly.get('pm2_5', [])
-            pm10 = hourly.get('pm10', [])
             
-            # Calculate average for the day (game time around 1 PM = hour 13)
-            # Get data around game time (hours 12-15)
-            game_hours = []
+            # Average AQI for hours 12-15
+            game_aqi_values = []
             for i, t in enumerate(times):
                 hour = int(t.split('T')[1].split(':')[0])
                 if 12 <= hour <= 15:
                     if us_aqi[i] is not None:
-                        game_hours.append({
-                            'aqi': us_aqi[i],
-                            'pm25': pm25[i],
-                            'pm10': pm10[i]
-                        })
+                        game_aqi_values.append(us_aqi[i])
             
-            if game_hours:
-                # Average the game-time hours
-                avg_aqi = sum(h['aqi'] for h in game_hours) / len(game_hours)
-                avg_pm25 = sum(h['pm25'] for h in game_hours if h['pm25'] is not None) / len([h for h in game_hours if h['pm25'] is not None]) if any(h['pm25'] is not None for h in game_hours) else None
-                avg_pm10 = sum(h['pm10'] for h in game_hours if h['pm10'] is not None) / len([h for h in game_hours if h['pm10'] is not None]) if any(h['pm10'] is not None for h in game_hours) else None
+            if game_aqi_values:
+                avg_aqi = sum(game_aqi_values) / len(game_aqi_values)
                 
                 try:
-                    # Store as US AQI (different from PM2.5!)
+                    # 1. Get Location ID
+                    loc_id = get_or_create_location(cursor, city)
+
+                    # 2. Insert using location_id
                     cursor.execute('''
                         INSERT INTO AirQuality 
-                        (game_date, location, pollutant_type, pollutant_value, unit)
+                        (game_date, location_id, pollutant_type, pollutant_value, unit)
                         VALUES (?, ?, ?, ?, ?)
-                    ''', (date, city, 'US_AQI', avg_aqi, 'AQI'))
+                    ''', (date, loc_id, 'US_AQI', avg_aqi, 'AQI'))
                     
                     stored_count += 1
-                    
-                    # Fixed print statement
-                    pm25_str = f"{avg_pm25:.1f}" if avg_pm25 is not None else "N/A"
-                    print(f"✓ AQI: {avg_aqi:.1f}, PM2.5: {pm25_str}")
+                    print(f"✓ AQI: {avg_aqi:.1f}")
                     
                 except sqlite3.IntegrityError:
                     print(f"✗ Duplicate")
-                    failed_count += 1
             else:
                 print(f"✗ No valid data")
-                failed_count += 1
         else:
             print(f"✗ No data")
-            failed_count += 1
         
         time.sleep(0.3)
     
     conn.commit()
-    
     cursor.execute("SELECT COUNT(*) FROM AirQuality")
     final_count = cursor.fetchone()[0]
-    
     conn.close()
     
     print(f"\n{'='*60}")
-    print(f"COLLECTION COMPLETE")
-    print(f"{'='*60}")
     print(f"Added: {stored_count}")
-    print(f"Failed: {failed_count}")
     print(f"Total now: {final_count}")
-    
-    remaining = len(all_combinations) - stored_count
-    if remaining > 0:
-        runs_needed = (remaining // 25) + (1 if remaining % 25 else 0)
-        print(f"Runs needed: {runs_needed}")
-    else:
-        print("✅ All data collected!")
-    
-    print(f"{'='*60}\n")
     show_database_stats()
 
 if __name__ == '__main__':

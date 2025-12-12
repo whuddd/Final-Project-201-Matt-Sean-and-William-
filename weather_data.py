@@ -92,11 +92,12 @@ def show_database_stats():
     cursor.execute("SELECT COUNT(*) FROM Weather")
     total = cursor.fetchone()[0]
     
-    # Count by location
+    # Count by location (CORRECTED: Joins Weather and Locations tables)
     cursor.execute("""
-        SELECT location, COUNT(*) 
-        FROM Weather 
-        GROUP BY location 
+        SELECT l.city_name, COUNT(*) 
+        FROM Weather w
+        JOIN Locations l ON w.location_id = l.location_id
+        GROUP BY l.city_name 
         ORDER BY COUNT(*) DESC
     """)
     by_location = cursor.fetchall()
@@ -112,6 +113,15 @@ def show_database_stats():
     conn.close()
     return total
 
+def get_or_create_location(cursor, city_name):
+    """Get location_id or create new location"""
+    cursor.execute("SELECT location_id FROM Locations WHERE city_name = ?", (city_name,))
+    result = cursor.fetchone()
+    if result:
+        return result[0]
+    cursor.execute("INSERT INTO Locations (city_name) VALUES (?)", (city_name,))
+    return cursor.lastrowid
+
 def store_weather_data():
     """
     Store up to 25 weather records per run
@@ -123,15 +133,23 @@ def store_weather_data():
     cursor.execute("SELECT COUNT(*) FROM Weather")
     actual_count = cursor.fetchone()[0]
     
-    # Check existing records
-    cursor.execute("SELECT game_date, location FROM Weather")
-    existing = set(cursor.fetchall())
+    # Check existing records (Need to join with Locations to check by name)
+    # Note: If the DB is empty, this returns nothing, which is fine.
+    try:
+        cursor.execute("""
+            SELECT w.game_date, l.city_name 
+            FROM Weather w 
+            JOIN Locations l ON w.location_id = l.location_id
+        """)
+        existing = set(cursor.fetchall())
+    except sqlite3.OperationalError:
+        # Handle case where table might be empty or join fails initially
+        existing = set()
     
     print(f"\n{'='*60}")
     print(f"WEATHER DATA COLLECTION - 2024 SEASON")
     print(f"{'='*60}")
     print(f"Current records in database: {actual_count}")
-    print(f"Unique date-location combinations: {len(existing)}")
     print(f"Total cities: {len(STADIUMS)} cities")
     print(f"{'='*60}\n")
     
@@ -146,9 +164,6 @@ def store_weather_data():
             saturdays.append(current.strftime('%Y-%m-%d'))
         current += timedelta(days=1)
     
-    print(f"Total Saturdays in season: {len(saturdays)}")
-    print(f"Maximum possible combinations: {len(saturdays) * len(STADIUMS)}")
-    
     # CREATE LIST OF ALL POSSIBLE COMBINATIONS
     all_combinations = []
     for city, coords in STADIUMS.items():
@@ -161,7 +176,6 @@ def store_weather_data():
     
     if len(all_combinations) == 0:
         print("⚠️  No new data to collect!")
-        print("All possible date-location combinations are already in the database.")
         show_database_stats()
         conn.close()
         return
@@ -180,56 +194,47 @@ def store_weather_data():
         
         if weather:
             try:
+                # 1. Get the Location ID
+                loc_id = get_or_create_location(cursor, city)
+
+                # 2. Insert using location_id instead of city string
                 cursor.execute('''
                     INSERT INTO Weather 
-                    (game_date, location, temperature, wind_speed, 
+                    (game_date, location_id, temperature, wind_speed, 
                      humidity, precipitation, weather_code)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
-                ''', (date, city, weather['temperature'], weather['wind_speed'],
+                ''', (date, loc_id, weather['temperature'], weather['wind_speed'],
                       weather['humidity'], weather['precipitation'], 
                       weather['weather_code']))
                 
                 stored_count += 1
                 print(f"✓ {weather['temperature']:.1f}°F")
-            except sqlite3.IntegrityError as e:
+            except sqlite3.IntegrityError:
                 print(f"✗ Duplicate (skipping)")
                 failed_count += 1
         else:
             print(f"✗ No data")
             failed_count += 1
         
-        # Small delay to be nice to the API
         time.sleep(0.5)
     
     conn.commit()
-    
-    # Verify final count
     cursor.execute("SELECT COUNT(*) FROM Weather")
     final_count = cursor.fetchone()[0]
-    
     conn.close()
     
     print(f"\n{'='*60}")
     print(f"COLLECTION COMPLETE")
     print(f"{'='*60}")
     print(f"New records added: {stored_count}")
-    print(f"Failed attempts: {failed_count}")
-    print(f"Previous total: {actual_count}")
     print(f"New total: {final_count}")
-    print(f"Difference: {final_count - actual_count}")
     
-    remaining = len(all_combinations) - stored_count
-    print(f"\nRemaining combinations: {remaining}")
-    
-    if remaining > 0:
-        runs_needed = (remaining // 25) + (1 if remaining % 25 else 0)
-        print(f"Estimated runs needed: {runs_needed}")
+    if final_count < 100:
+        runs_needed = ((100 - final_count) // 25) + 1
+        print(f"Need {runs_needed} more runs")
     else:
-        print("✅ All data collected!")
-    
+        print("✅ 100+ records collected!")
     print(f"{'='*60}\n")
-    
-    # Show breakdown
     show_database_stats()
 
 if __name__ == '__main__':

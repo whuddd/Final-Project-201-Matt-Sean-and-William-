@@ -16,34 +16,28 @@ from utils import connect_db, normalize_location, ensure_outputs_dir
 
 
 def load_data_with_sql_join(conn):
-    """
-    Load data using a SQL JOIN to satisfy Project Requirement #6.
-    Joins Games, Teams, Weather, and Moon_Data.
-    """
     query = """
     SELECT 
         g.game_date,
-        g.stadium_city,
+        loc.city_name as stadium_city,  -- Get text from Locations table
         g.home_score,
         g.away_score,
-        -- FIX: Calculate total_points on the fly because the column doesn't exist
         (g.home_score + g.away_score) AS total_points,
-        g.attendance,
         t_home.team_name AS home_team_name,
         t_away.team_name AS away_team_name,
         w.temperature,
         w.wind_speed,
         w.precipitation,
-        m.moon_illumination,
-        m.moon_phase
+        m.moon_illumination
     FROM Games g
-    -- JOIN 1 & 2: Link Games to Teams (Shared Integer Key)
+    -- JOIN Locations to get the city name
+    JOIN Locations loc ON g.location_id = loc.location_id
     JOIN Teams t_home ON g.home_team_id = t_home.team_id
     JOIN Teams t_away ON g.away_team_id = t_away.team_id
-    -- JOIN 3: Link Games to Weather (Shared String Key + Date)
-    LEFT JOIN Weather w ON g.game_date = w.game_date AND g.stadium_city = w.location
-    -- JOIN 4: Link Games to Moon Data (Shared String Key + Date)
-    LEFT JOIN Moon_Data m ON g.game_date = m.game_date AND g.stadium_city = m.location
+    -- Link Weather using Date + Location ID
+    LEFT JOIN Weather w ON g.game_date = w.game_date AND g.location_id = w.location_id
+    -- Link Moon Data using Date + Location ID
+    LEFT JOIN Moon_Data m ON g.game_date = m.game_date AND g.location_id = m.location_id
     """
     return pd.read_sql_query(query, conn)
 

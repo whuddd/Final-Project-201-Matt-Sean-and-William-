@@ -4,26 +4,29 @@
 import sqlite3
 
 def create_database():
-    """
-    Create all tables for the project
-    """
     conn = sqlite3.connect('football_weather.db')
     cursor = conn.cursor()
     
-    print("Creating database tables...")
-    
-    # Table 1: Teams (avoids duplicate team names)
+    # 1. NEW: Locations Table (The "Master" list of cities)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Locations (
+            location_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            city_name TEXT UNIQUE NOT NULL
+        )
+    ''')
+
+    # 2. Teams: Change stadium_city (Text) to location_id (Integer)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS Teams (
             team_id INTEGER PRIMARY KEY AUTOINCREMENT,
             team_name TEXT UNIQUE NOT NULL,
             conference TEXT,
-            stadium_city TEXT
+            location_id INTEGER,
+            FOREIGN KEY (location_id) REFERENCES Locations(location_id)
         )
     ''')
-    print("  ✓ Teams table created")
-    
-    # Table 2: Games (references Teams table)
+
+    # 3. Games: Change stadium_city (Text) to location_id (Integer)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS Games (
             game_id INTEGER PRIMARY KEY,
@@ -32,84 +35,60 @@ def create_database():
             away_team_id INTEGER,
             home_score INTEGER,
             away_score INTEGER,
-            stadium_city TEXT,
+            location_id INTEGER, 
             attendance INTEGER,
             kickoff_time TEXT,
             FOREIGN KEY (home_team_id) REFERENCES Teams(team_id),
-            FOREIGN KEY (away_team_id) REFERENCES Teams(team_id)
+            FOREIGN KEY (away_team_id) REFERENCES Teams(team_id),
+            FOREIGN KEY (location_id) REFERENCES Locations(location_id)
         )
     ''')
-    print("  ✓ Games table created")
-    
-    # Table 3: Weather Data
+
+    # 4. Weather: Change location (Text) to location_id (Integer)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS Weather (
             weather_id INTEGER PRIMARY KEY AUTOINCREMENT,
             game_date TEXT NOT NULL,
-            location TEXT NOT NULL,
+            location_id INTEGER,
             temperature REAL,
             wind_speed REAL,
             humidity REAL,
             precipitation REAL,
-            weather_code INTEGER
+            weather_code INTEGER,
+            FOREIGN KEY (location_id) REFERENCES Locations(location_id)
         )
     ''')
-    print("  ✓ Weather table created")
-    
-    # Table 4: Air Quality Data
+
+    # 5. AirQuality: Change location (Text) to location_id (Integer)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS AirQuality (
             measure_id INTEGER PRIMARY KEY AUTOINCREMENT,
             game_date TEXT NOT NULL,
-            location TEXT NOT NULL,
+            location_id INTEGER,
             pollutant_type TEXT,
             pollutant_value REAL,
-            unit TEXT
+            unit TEXT,
+            FOREIGN KEY (location_id) REFERENCES Locations(location_id)
         )
     ''')
-    print("  ✓ AirQuality table created")
-    
-    # Table 5: UV Data (BONUS API)
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS UV_Data (
-            uv_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            game_date TEXT NOT NULL,
-            location TEXT NOT NULL,
-            latitude REAL,
-            longitude REAL,
-            uv_index REAL,
-            uv_max REAL,
-            uv_max_time TEXT,
-            ozone REAL,
-            safe_exposure_time INTEGER
-        )
-    ''')
-    print("  ✓ UV_Data table created")
-    
-    # Table 6: Moon Phase Data (BONUS API #2) - NEW!
+
+    # 6. Moon_Data: Change location (Text) to location_id (Integer)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS Moon_Data (
             moon_id INTEGER PRIMARY KEY AUTOINCREMENT,
             game_date TEXT NOT NULL,
-            location TEXT NOT NULL,
+            location_id INTEGER,
             latitude REAL,
             longitude REAL,
             moon_phase TEXT,
             moon_illumination REAL,
-            moonrise TEXT,
-            moonset TEXT,
-            moon_altitude REAL,
-            moon_azimuth REAL,
-            UNIQUE(game_date, location)
+            UNIQUE(game_date, location_id),
+            FOREIGN KEY (location_id) REFERENCES Locations(location_id)
         )
     ''')
-    print("  ✓ Moon_Data table created")
     
     conn.commit()
     conn.close()
-    
-    print("\n✅ Database created successfully!")
-    print("   Tables: Teams, Games, Weather, AirQuality, UV_Data, Moon_Data")
 
 if __name__ == '__main__':
     create_database()

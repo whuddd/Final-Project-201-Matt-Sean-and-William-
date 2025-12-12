@@ -36,7 +36,23 @@ STADIUM_TO_CITY = {
     'Bobby Dodd Stadium': 'Atlanta',  # Georgia Tech
 }
 
-def get_or_create_team(cursor, team_name, conference="Unknown", city="Unknown"):
+def get_or_create_location(cursor, city_name):
+    """
+    Get location_id for a city name, or create it if it doesn't exist.
+    This prevents duplicate string data by normalizing locations to an ID.
+    """
+    # 1. Try to find the existing ID
+    cursor.execute("SELECT location_id FROM Locations WHERE city_name = ?", (city_name,))
+    result = cursor.fetchone()
+    
+    if result:
+        return result[0]
+    else:
+        # 2. Create new location if not found
+        cursor.execute("INSERT INTO Locations (city_name) VALUES (?)", (city_name,))
+        return cursor.lastrowid
+
+def get_or_create_team(cursor, team_name, conference="Unknown", location_id=None):
     """Get team_id or create new team (avoids duplicate team names)"""
     cursor.execute("SELECT team_id FROM Teams WHERE team_name = ?", (team_name,))
     result = cursor.fetchone()
@@ -44,9 +60,10 @@ def get_or_create_team(cursor, team_name, conference="Unknown", city="Unknown"):
     if result:
         return result[0]
     else:
+        # [cite_start]FIX: Insert location_id instead of stadium_city string [cite: 13, 14, 25, 26]
         cursor.execute(
-            "INSERT INTO Teams (team_name, conference, stadium_city) VALUES (?, ?, ?)",
-            (team_name, conference, city)
+            "INSERT INTO Teams (team_name, conference, location_id) VALUES (?, ?, ?)",
+            (team_name, conference, location_id)
         )
         return cursor.lastrowid
 
@@ -95,23 +112,15 @@ def show_database_stats():
     cursor.execute("SELECT COUNT(*) FROM Teams")
     total_teams = cursor.fetchone()[0]
     
+    # Updated to join with Locations table for readable stats
     cursor.execute("""
-        SELECT stadium_city, COUNT(*) 
-        FROM Games 
-        GROUP BY stadium_city 
+        SELECT l.city_name, COUNT(*) 
+        FROM Games g
+        JOIN Locations l ON g.location_id = l.location_id
+        GROUP BY l.city_name 
         ORDER BY COUNT(*) DESC
     """)
     by_city = cursor.fetchall()
-    
-    cursor.execute("""
-        SELECT g.game_date, t1.team_name, g.home_score, g.away_score, t2.team_name, g.stadium_city
-        FROM Games g
-        JOIN Teams t1 ON g.home_team_id = t1.team_id
-        JOIN Teams t2 ON g.away_team_id = t2.team_id
-        ORDER BY g.game_date DESC
-        LIMIT 5
-    """)
-    sample_games = cursor.fetchall()
     
     print("\n" + "="*60)
     print("DATABASE STATISTICS")
@@ -123,11 +132,6 @@ def show_database_stats():
         print("\nGames by city:")
         for city, count in by_city:
             print(f"  {city}: {count}")
-    
-    if sample_games:
-        print("\nMost recent games:")
-        for date, home, h_score, a_score, away, city in sample_games:
-            print(f"  {date} ({city}): {home} {h_score}-{a_score} {away}")
     
     conn.close()
     return total_games
@@ -215,25 +219,27 @@ def store_football_data():
             attendance = game.get('attendance')
 
             
-            # Get or create team IDs
-            home_team_id = get_or_create_team(cursor, home_team, home_conference, stadium_city)
-            away_team_id = get_or_create_team(cursor, away_team, away_conference, stadium_city)
+            # 1. Get the Location ID (Integer)
+            loc_id = get_or_create_location(cursor, stadium_city)
             
-            # Insert game
+            # 2. Get or create team IDs (Passing loc_id instead of string)
+            home_team_id = get_or_create_team(cursor, home_team, home_conference, loc_id)
+            away_team_id = get_or_create_team(cursor, away_team, away_conference, loc_id)
+            
+            # 3. Insert game
             try:
                 cursor.execute('''
                     INSERT INTO Games 
                     (game_id, game_date, home_team_id, away_team_id, 
-                    home_score, away_score, stadium_city,
+                    home_score, away_score, location_id,
                     attendance, kickoff_time)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
                     game_id, game_date, home_team_id, away_team_id,
-                    home_score, away_score, stadium_city,
+                    home_score, away_score, loc_id,
                     attendance, kickoff_time
                 ))
 
-                
                 stored_count += 1
                 total = home_score + away_score
                 print(f"  [{stored_count}] {game_date} ({stadium_city}): {home_team} {home_score}-{away_score} {away_team}")
