@@ -1,4 +1,4 @@
-# CollegeFootballData API Key
+# CollegeFootballData API Keys
 # config.py
 
 COLLEGE_FOOTBALL_KEY = "/B1iWveNag3wRgXOp0Z7S7b4fjvUr5IteQbr1qtFGKpoLD+G11jiArbs6BXuZVsB"
