@@ -1,31 +1,31 @@
-stadium_city,rainy,num_games,num_wins,win_pct
-Ann Arbor,False,5,4,0.8
-Ann Arbor,True,1,1,1.0
-Athens,False,2,2,1.0
-Athens,True,1,1,1.0
-Atlanta,False,3,3,1.0
-Auburn,False,5,2,0.4
-Austin,False,5,4,0.8
-Baton Rouge,False,3,3,1.0
-Baton Rouge,True,1,1,1.0
-Blacksburg,False,12,8,0.6666666666666666
-Bloomington,False,6,6,1.0
-Champaign,False,6,5,0.8333333333333334
-Clemson,False,4,4,1.0
-College Station,False,5,4,0.8
-Columbia,False,4,2,0.5
-Columbus,False,5,5,1.0
-East Lansing,False,4,3,0.75
-Eugene,False,5,5,1.0
-Gainesville,False,5,3,0.6
-Iowa City,False,5,4,0.8
-Knoxville,False,4,4,1.0
-Lincoln,False,5,4,0.8
-Madison,False,5,3,0.6
-Starkville,False,5,1,0.2
-State College,False,4,3,0.75
-State College,True,1,1,1.0
-Tallahassee,False,4,1,0.25
-Tuscaloosa,False,4,4,1.0
-Tuscaloosa,True,1,1,1.0
-West Lafayette,False,5,1,0.2
+Stadium,Condition,Total Games,Home Wins,Home Win %
+Ann Arbor,Dry,5,4,80.0
+Ann Arbor,Rainy,1,1,100.0
+Athens,Dry,2,2,100.0
+Athens,Rainy,1,1,100.0
+Atlanta,Dry,3,3,100.0
+Auburn,Dry,5,2,40.0
+Austin,Dry,5,4,80.0
+Baton Rouge,Dry,3,3,100.0
+Baton Rouge,Rainy,1,1,100.0
+Blacksburg,Dry,12,8,66.7
+Bloomington,Dry,6,6,100.0
+Champaign,Dry,6,5,83.3
+Clemson,Dry,4,4,100.0
+College Station,Dry,5,4,80.0
+Columbia,Dry,4,2,50.0
+Columbus,Dry,5,5,100.0
+East Lansing,Dry,4,3,75.0
+Eugene,Dry,5,5,100.0
+Gainesville,Dry,5,3,60.0
+Iowa City,Dry,5,4,80.0
+Knoxville,Dry,4,4,100.0
+Lincoln,Dry,5,4,80.0
+Madison,Dry,5,3,60.0
+Starkville,Dry,5,1,20.0
+State College,Dry,4,3,75.0
+State College,Rainy,1,1,100.0
+Tallahassee,Dry,4,1,25.0
+Tuscaloosa,Dry,4,4,100.0
+Tuscaloosa,Rainy,1,1,100.0
+West Lafayette,Dry,5,1,20.0

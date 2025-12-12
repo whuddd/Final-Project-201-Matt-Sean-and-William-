@@ -1,7 +1,5 @@
-wind_bin,precip_flag,count,avg_total_points
-0-5,False,12,48.916666666666664
-0-5,True,0,
-6-15,False,21,51.0
-6-15,True,5,49.2
-16+,False,1,58.0
-16+,True,0,
+Wind Category,Weather Condition,Games Played,Avg Total Score
+Low Wind (0-5 mph),Dry,12,48.9
+Medium Wind (6-15 mph),Dry,21,51.0
+Medium Wind (6-15 mph),Rainy,5,49.2
+High Wind (16+ mph),Dry,1,58.0

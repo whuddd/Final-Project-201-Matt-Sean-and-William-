@@ -1,5 +1,4 @@
-moon_bin,count,avg_total_points
-0-0.25,14,47.785714285714285
-0.25-0.5,0,
-0.5-0.75,5,59.6
-0.75-1.0,4,55.0
+Moon Phase Category,Games Played,Avg Total Score
+New Moon (0-25%),14,47.8
+Gibbous (50-75%),5,59.6
+Full Moon (75-100%),4,55.0
