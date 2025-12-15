@@ -120,7 +120,7 @@ def show_database_stats():
         ORDER BY COUNT(*) DESC
     """)
     by_location = cursor.fetchall()
-    
+    #
     print("\n" + "="*60)
     print("DATABASE STATISTICS")
     print("="*60)

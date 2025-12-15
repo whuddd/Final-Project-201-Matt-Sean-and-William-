@@ -17,7 +17,7 @@ def plot_temp_impact():
 
     # Filter empty bins. New column names:
     df = df[df['Games Played'] > 0].copy().reset_index(drop=True)
-
+#
     plt.figure(figsize=(10, 6))
     sns.set_theme(style="whitegrid")
 

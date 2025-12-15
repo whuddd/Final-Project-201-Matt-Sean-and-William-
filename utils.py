@@ -10,7 +10,7 @@ def connect_db(db_path: str = 'football_weather.db'):
 
 def normalize_location(value):
     """Normalize location/stadium_city strings for safe joins.
-
+#
     Lowercases, removes non-alphanumerics, collapses whitespace.
     Returns None for None-like inputs.
     """

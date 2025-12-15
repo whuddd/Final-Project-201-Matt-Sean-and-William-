@@ -15,7 +15,7 @@ params = {
     "lng": -83.7430,      # Ann Arbor Longitude
     "date": "2024-10-12"  # The specific day of the football game
 }
-
+#
 headers = {
     "x-access-token": OPENUV_KEY.strip(),
     "Content-Type": "application/json"

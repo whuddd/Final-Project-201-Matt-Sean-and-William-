@@ -110,7 +110,7 @@ def show_database_stats():
     
     conn.close()
     return total
-
+#
 def get_or_create_location(cursor, city_name):
     """Get location_id or create new location"""
     cursor.execute("SELECT location_id FROM Locations WHERE city_name = ?", (city_name,))

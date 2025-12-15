@@ -6,7 +6,7 @@ import sqlite3
 import requests
 from config import COLLEGE_FOOTBALL_KEY
 import time
-
+#
 # Map EXACT stadium names to our weather cities (EXPANDED TO 25 STADIUMS)
 STADIUM_TO_CITY = {
     'Michigan Stadium': 'Ann Arbor',
