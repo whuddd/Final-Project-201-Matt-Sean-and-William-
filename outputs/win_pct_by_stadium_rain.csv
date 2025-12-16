@@ -1,31 +1,27 @@
 Stadium,Condition,Total Games,Home Wins,Home Win %
-Ann Arbor,Dry,5,4,80.0
-Ann Arbor,Rainy,1,1,100.0
-Athens,Dry,2,2,100.0
-Athens,Rainy,1,1,100.0
+Ann Arbor,Dry,13,9,69.2
+Ann Arbor,Rainy,4,4,100.0
+Athens,Dry,3,3,100.0
 Atlanta,Dry,3,3,100.0
 Auburn,Dry,5,2,40.0
-Austin,Dry,5,4,80.0
-Baton Rouge,Dry,3,3,100.0
-Baton Rouge,Rainy,1,1,100.0
-Blacksburg,Dry,12,8,66.7
-Bloomington,Dry,6,6,100.0
-Champaign,Dry,6,5,83.3
+Austin,Dry,4,4,100.0
+Baton Rouge,Dry,4,4,100.0
+Blacksburg,Dry,6,3,50.0
+Bloomington,Dry,4,4,100.0
+Champaign,Dry,4,4,100.0
 Clemson,Dry,4,4,100.0
-College Station,Dry,5,4,80.0
+College Station,Dry,4,3,75.0
 Columbia,Dry,4,2,50.0
-Columbus,Dry,5,5,100.0
-East Lansing,Dry,4,3,75.0
-Eugene,Dry,5,5,100.0
-Gainesville,Dry,5,3,60.0
-Iowa City,Dry,5,4,80.0
-Knoxville,Dry,4,4,100.0
+Columbus,Dry,13,13,100.0
+East Lansing,Dry,3,2,66.7
+Eugene,Dry,4,4,100.0
+Gainesville,Dry,4,2,50.0
+Iowa City,Dry,4,3,75.0
+Knoxville,Dry,3,3,100.0
 Lincoln,Dry,5,4,80.0
-Madison,Dry,5,3,60.0
-Starkville,Dry,5,1,20.0
-State College,Dry,4,3,75.0
-State College,Rainy,1,1,100.0
+Madison,Dry,4,3,75.0
+Starkville,Dry,3,1,33.3
+State College,Dry,4,4,100.0
 Tallahassee,Dry,4,1,25.0
 Tuscaloosa,Dry,4,4,100.0
-Tuscaloosa,Rainy,1,1,100.0
-West Lafayette,Dry,5,1,20.0
+West Lafayette,Dry,4,1,25.0

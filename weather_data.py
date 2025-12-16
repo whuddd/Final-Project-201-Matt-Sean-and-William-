@@ -6,6 +6,7 @@ import sqlite3
 import requests
 from datetime import datetime, timedelta
 import time
+from utils import get_or_create_location, get_or_create_date
 
 # Stadium coordinates 
 STADIUMS = {
@@ -195,17 +196,21 @@ def store_weather_data():
         if weather:
             try:
                 # 1. Get the Location ID
+# NEW CODE
                 loc_id = get_or_create_location(cursor, city)
 
-                # 2. Insert using location_id instead of city string
+                # --- NEW STEP ---
+                date_id = get_or_create_date(cursor, date)
+
+                # --- UPDATE INSERT ---
                 cursor.execute('''
                     INSERT INTO Weather 
-                    (game_date, location_id, temperature, wind_speed, 
-                     humidity, precipitation, weather_code)
+                    (date_id, location_id, temperature, wind_speed, 
+                    humidity, precipitation, weather_code)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
-                ''', (date, loc_id, weather['temperature'], weather['wind_speed'],
-                      weather['humidity'], weather['precipitation'], 
-                      weather['weather_code']))
+                ''', (date_id, loc_id, weather['temperature'], weather['wind_speed'],
+                    weather['humidity'], weather['precipitation'], 
+                    weather['weather_code']))
                 
                 stored_count += 1
                 print(f"✓ {weather['temperature']:.1f}°F")

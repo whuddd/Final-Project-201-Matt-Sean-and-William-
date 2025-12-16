@@ -6,7 +6,9 @@ import sqlite3
 import requests
 from config import COLLEGE_FOOTBALL_KEY
 import time
-#
+# IMPORT THE NEW HELPERS
+from utils import get_or_create_location, get_or_create_date  # <-- UPDATED IMPORT
+
 # Map EXACT stadium names to our weather cities (EXPANDED TO 25 STADIUMS)
 STADIUM_TO_CITY = {
     'Michigan Stadium': 'Ann Arbor',
@@ -36,21 +38,9 @@ STADIUM_TO_CITY = {
     'Bobby Dodd Stadium': 'Atlanta',  # Georgia Tech
 }
 
-def get_or_create_location(cursor, city_name):
-    """
-    Get location_id for a city name, or create it if it doesn't exist.
-    This prevents duplicate string data by normalizing locations to an ID.
-    """
-    # 1. Try to find the existing ID
-    cursor.execute("SELECT location_id FROM Locations WHERE city_name = ?", (city_name,))
-    result = cursor.fetchone()
-    
-    if result:
-        return result[0]
-    else:
-        # 2. Create new location if not found
-        cursor.execute("INSERT INTO Locations (city_name) VALUES (?)", (city_name,))
-        return cursor.lastrowid
+# Note: get_or_create_location is now imported from utils, 
+# so we don't need to redefine it here unless you want to keep it local.
+# I removed it to use the one from utils.py to keep things clean.
 
 def get_or_create_team(cursor, team_name, conference="Unknown", location_id=None):
     """Get team_id or create new team (avoids duplicate team names)"""
@@ -60,7 +50,6 @@ def get_or_create_team(cursor, team_name, conference="Unknown", location_id=None
     if result:
         return result[0]
     else:
-        # [cite_start]FIX: Insert location_id instead of stadium_city string [cite: 13, 14, 25, 26]
         cursor.execute(
             "INSERT INTO Teams (team_name, conference, location_id) VALUES (?, ?, ?)",
             (team_name, conference, location_id)
@@ -90,6 +79,13 @@ def get_city_from_venue(venue_name):
     if not venue_name:
         return None
     
+    # --- ADD THIS FIX ---
+    # Baylor's stadium is "McLane Stadium". 
+    # We must ignore it so it doesn't match "Lane Stadium" (Blacksburg).
+    if "McLane" in venue_name:
+        return None
+    # --------------------
+
     # Check if exact stadium name matches
     if venue_name in STADIUM_TO_CITY:
         return STADIUM_TO_CITY[venue_name]
@@ -106,11 +102,17 @@ def show_database_stats():
     conn = sqlite3.connect('football_weather.db')
     cursor = conn.cursor()
     
-    cursor.execute("SELECT COUNT(*) FROM Games")
-    total_games = cursor.fetchone()[0]
-    
-    cursor.execute("SELECT COUNT(*) FROM Teams")
-    total_teams = cursor.fetchone()[0]
+    # Check tables exist first
+    try:
+        cursor.execute("SELECT COUNT(*) FROM Games")
+        total_games = cursor.fetchone()[0]
+        
+        cursor.execute("SELECT COUNT(*) FROM Teams")
+        total_teams = cursor.fetchone()[0]
+    except sqlite3.OperationalError:
+        print("Tables not ready yet.")
+        conn.close()
+        return 0
     
     # Updated to join with Locations table for readable stats
     cursor.execute("""
@@ -141,11 +143,19 @@ def store_football_data():
     conn = sqlite3.connect('football_weather.db')
     cursor = conn.cursor()
     
-    cursor.execute("SELECT COUNT(*) FROM Games")
-    actual_count = cursor.fetchone()[0]
+    # Ensure tables exist (count check)
+    try:
+        cursor.execute("SELECT COUNT(*) FROM Games")
+        actual_count = cursor.fetchone()[0]
+    except sqlite3.OperationalError:
+        actual_count = 0
     
-    cursor.execute("SELECT game_id FROM Games")
-    existing_game_ids = set(row[0] for row in cursor.fetchall())
+    # Check existing IDs
+    try:
+        cursor.execute("SELECT game_id FROM Games")
+        existing_game_ids = set(row[0] for row in cursor.fetchall())
+    except sqlite3.OperationalError:
+        existing_game_ids = set()
     
     print(f"\n{'='*60}")
     print(f"FOOTBALL DATA COLLECTION - 2024 SEASON")
@@ -221,27 +231,29 @@ def store_football_data():
             
             # 1. Get the Location ID (Integer)
             loc_id = get_or_create_location(cursor, stadium_city)
+
+            # 2. NEW: Get the Date ID (Integer) - THIS FIXES THE DUPLICATE STRING ISSUE
+            date_id = get_or_create_date(cursor, game_date)
             
-            # 2. Get or create team IDs (Passing loc_id instead of string)
+            # 3. Get or create team IDs (Passing loc_id instead of string)
             home_team_id = get_or_create_team(cursor, home_team, home_conference, loc_id)
             away_team_id = get_or_create_team(cursor, away_team, away_conference, loc_id)
             
-            # 3. Insert game
+            # 4. Insert game using date_id instead of game_date
             try:
                 cursor.execute('''
                     INSERT INTO Games 
-                    (game_id, game_date, home_team_id, away_team_id, 
+                    (game_id, date_id, home_team_id, away_team_id, 
                     home_score, away_score, location_id,
                     attendance, kickoff_time)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
-                    game_id, game_date, home_team_id, away_team_id,
+                    game_id, date_id, home_team_id, away_team_id,
                     home_score, away_score, loc_id,
                     attendance, kickoff_time
                 ))
 
                 stored_count += 1
-                total = home_score + away_score
                 print(f"  [{stored_count}] {game_date} ({stadium_city}): {home_team} {home_score}-{away_score} {away_team}")
                 
             except sqlite3.IntegrityError:

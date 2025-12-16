@@ -6,6 +6,8 @@ import sqlite3
 import requests
 from datetime import datetime, timedelta
 import time
+# IMPORT THE NEW HELPERS
+from utils import get_or_create_date, get_or_create_location
 
 # Cities matching football/weather/AQ/UV data (25 cities)
 CITIES = {
@@ -79,10 +81,13 @@ def create_moon_table():
     conn = sqlite3.connect('football_weather.db')
     cursor = conn.cursor()
     
+    # Drop old table if needed (optional, but good for resetting schema)
+    # cursor.execute("DROP TABLE IF EXISTS Moon_Data")
+
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS Moon_Data (
             moon_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            game_date TEXT NOT NULL,
+            date_id INTEGER,              -- UPDATED: Uses date_id instead of game_date string
             location_id INTEGER,          
             latitude REAL,
             longitude REAL,
@@ -92,7 +97,9 @@ def create_moon_table():
             moonset TEXT,
             moon_altitude REAL,
             moon_azimuth REAL,
-            UNIQUE(game_date, location_id) 
+            UNIQUE(date_id, location_id), -- UPDATED: Unique on IDs
+            FOREIGN KEY (date_id) REFERENCES Dates(date_id),
+            FOREIGN KEY (location_id) REFERENCES Locations(location_id)
         )
     ''')
     
@@ -108,10 +115,14 @@ def show_database_stats():
     cursor = conn.cursor()
     
     # Total count
-    cursor.execute("SELECT COUNT(*) FROM Moon_Data")
-    total = cursor.fetchone()[0]
+    try:
+        cursor.execute("SELECT COUNT(*) FROM Moon_Data")
+        total = cursor.fetchone()[0]
+    except sqlite3.OperationalError:
+        print("Table not found or empty.")
+        return 0
     
-    # Count by location (CORRECTED: Joins Moon_Data and Locations tables)
+    # Count by location
     cursor.execute("""
         SELECT l.city_name, COUNT(*) 
         FROM Moon_Data m
@@ -120,7 +131,7 @@ def show_database_stats():
         ORDER BY COUNT(*) DESC
     """)
     by_location = cursor.fetchall()
-    #
+    
     print("\n" + "="*60)
     print("DATABASE STATISTICS")
     print("="*60)
@@ -132,15 +143,6 @@ def show_database_stats():
     conn.close()
     return total
 
-def get_or_create_location(cursor, city_name):
-    """Get location_id or create new location"""
-    cursor.execute("SELECT location_id FROM Locations WHERE city_name = ?", (city_name,))
-    result = cursor.fetchone()
-    if result:
-        return result[0]
-    cursor.execute("INSERT INTO Locations (city_name) VALUES (?)", (city_name,))
-    return cursor.lastrowid
-
 def store_moon_data():
     """Store up to 25 moon phase records per run"""
     create_moon_table() # Ensure table exists
@@ -151,15 +153,17 @@ def store_moon_data():
     cursor.execute("SELECT COUNT(*) FROM Moon_Data")
     actual_count = cursor.fetchone()[0]
     
-    # Check existing (Joined with Locations)
+    # Check existing (Joined with Locations AND Dates to get strings back)
     try:
         cursor.execute("""
-            SELECT m.game_date, l.city_name 
+            SELECT d.date_str, l.city_name 
             FROM Moon_Data m 
             JOIN Locations l ON m.location_id = l.location_id
+            JOIN Dates d ON m.date_id = d.date_id
         """)
         existing = set(cursor.fetchall())
     except sqlite3.OperationalError:
+        # This handles cases where tables might not exist yet
         existing = set()
     
     print(f"\n{'='*60}")
@@ -219,13 +223,16 @@ def store_moon_data():
                 # 1. Get Location ID
                 loc_id = get_or_create_location(cursor, city)
 
-                # 2. Insert using location_id
+                # 2. Get Date ID (NEW STEP)
+                date_id = get_or_create_date(cursor, date)
+
+                # 3. Insert using IDs
                 cursor.execute('''
                     INSERT INTO Moon_Data 
-                    (game_date, location_id, latitude, longitude, moon_phase, 
+                    (date_id, location_id, latitude, longitude, moon_phase, 
                      moon_illumination, moonrise, moonset, moon_altitude, moon_azimuth)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (date, loc_id, returned_lat, returned_lon, moon_phase,
+                ''', (date_id, loc_id, returned_lat, returned_lon, moon_phase,
                       moon_illumination, moonrise, moonset, moon_altitude, moon_azimuth))
                 
                 stored_count += 1

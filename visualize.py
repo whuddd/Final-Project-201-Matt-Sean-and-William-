@@ -15,23 +15,24 @@ def plot_temp_impact():
         print("❌ Missing points_by_temp.csv")
         return
 
-    # Filter empty bins. New column names:
+    # Filter empty bins. 
+    # MATCHING COLUMN NAME: 'Avg Total Score'
     df = df[df['Games Played'] > 0].copy().reset_index(drop=True)
-#
+
     plt.figure(figsize=(10, 6))
     sns.set_theme(style="whitegrid")
 
     ax = sns.barplot(
         data=df, 
-        x='Temperature Range',      # Updated name
-        y='Avg Total Points',       # Updated name
+        x='Temperature Range',      
+        y='Avg Total Score',       # FIXED NAME
         hue='Temperature Range', 
         palette='RdBu_r', 
         edgecolor='black'
     )
 
     for i, row in df.iterrows():
-        height = row['Avg Total Points']
+        height = row['Avg Total Score'] # FIXED NAME
         count = int(row['Games Played'])
         text_color = 'black' if i == 1 else 'white'
         ax.text(i, height + 1, f'{height:.1f} pts', ha='center', fontweight='bold', color='black')
@@ -39,8 +40,8 @@ def plot_temp_impact():
 
     plt.title('Impact of Temperature on Total Scoring', fontsize=14)
     plt.xlabel('Temperature (°F)', fontsize=12)
-    plt.ylabel('Average Total Points', fontsize=12)
-    plt.ylim(0, max(df['Avg Total Points']) * 1.2)
+    plt.ylabel('Average Total Score', fontsize=12)
+    plt.ylim(0, max(df['Avg Total Score']) * 1.2) # FIXED NAME
     
     ensure_figures_dir()
     plt.savefig('figures/1_temperature_impact.png', dpi=300, bbox_inches='tight')
@@ -54,32 +55,32 @@ def plot_wind_impact():
     except FileNotFoundError:
         return
 
-    # Use new column names
-    df_wind = df.groupby('Wind Speed').agg({
-        'Avg Total Points': 'mean', 
+    # MATCHING COLUMN NAMES: 'Wind Category', 'Avg Total Score'
+    df_wind = df.groupby('Wind Category').agg({
+        'Avg Total Score': 'mean', 
         'Games Played': 'sum'
     }).reset_index()
 
     plt.figure(figsize=(10, 6))
     ax = sns.barplot(
         data=df_wind, 
-        x='Wind Speed', 
-        y='Avg Total Points', 
-        hue='Wind Speed', 
+        x='Wind Category',         # FIXED NAME
+        y='Avg Total Score',       # FIXED NAME
+        hue='Wind Category',       # FIXED NAME
         palette='viridis', 
         edgecolor='black'
     )
 
     for i, row in df_wind.iterrows():
-        height = row['Avg Total Points']
+        height = row['Avg Total Score'] # FIXED NAME
         count = int(row['Games Played'])
         if count > 0:
             ax.text(i, height + 0.5, f'{height:.1f}', ha='center', fontweight='bold')
             ax.text(i, height - 3, f'n={count}', ha='center', color='white', fontsize=9)
 
     plt.title('Does Wind Speed Affect Scoring?', fontsize=14)
-    plt.xlabel('Wind Speed (mph)', fontsize=12)
-    plt.ylabel('Average Total Points', fontsize=12)
+    plt.xlabel('Wind Speed Category', fontsize=12)
+    plt.ylabel('Average Total Score', fontsize=12)
     
     ensure_figures_dir()
     plt.savefig('figures/2_wind_impact.png', dpi=300, bbox_inches='tight')
@@ -94,11 +95,12 @@ def plot_rain_scoring():
         return
 
     # Create condition column from Precip column
+    # MATCHING COLUMN NAMES: 'Precip (in)', 'Total Pts'
     df['Condition'] = df['Precip (in)'].apply(lambda x: 'Rain' if x > 0 else 'Dry')
 
     plt.figure(figsize=(8, 6))
-    sns.boxplot(data=df, x='Condition', y='Total Points', palette=['skyblue', 'gray'])
-    sns.stripplot(data=df, x='Condition', y='Total Points', color='black', alpha=0.3)
+    sns.boxplot(data=df, x='Condition', y='Total Pts', palette=['skyblue', 'gray']) # FIXED NAME
+    sns.stripplot(data=df, x='Condition', y='Total Pts', color='black', alpha=0.3) # FIXED NAME
 
     plt.title('Scoring Distribution: Rain vs. Dry Games', fontsize=14)
     plt.ylabel('Total Points Scored', fontsize=12)
@@ -115,12 +117,13 @@ def plot_rain_win_pct():
     except FileNotFoundError:
         return
 
+    # MATCHING COLUMN NAMES: 'Stadium', 'Home Win %', 'Condition'
     plt.figure(figsize=(14, 7))
     sns.barplot(
         data=df, 
-        x='Stadium',      # New name
-        y='Home Win %',   # New name
-        hue='Weather',    # New name
+        x='Stadium',      
+        y='Home Win %',   
+        hue='Condition',    # FIXED NAME (was 'Weather')
         palette={'Dry': '#4c7d9e', 'Rainy': '#c44e52'}
     )
 

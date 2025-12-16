@@ -7,6 +7,7 @@ import sqlite3
 import requests
 from datetime import datetime, timedelta
 import time
+from utils import get_or_create_location, get_or_create_date
 
 # Cities matching football/weather/UV/Moon data (25 cities)
 CITIES = {
@@ -87,8 +88,13 @@ def show_database_stats():
     cursor = conn.cursor()
     
     # Total count (Make sure your table is named 'AirQuality')
-    cursor.execute("SELECT COUNT(*) FROM AirQuality")
-    total = cursor.fetchone()[0]
+    try:
+        cursor.execute("SELECT COUNT(*) FROM AirQuality")
+        total = cursor.fetchone()[0]
+    except sqlite3.OperationalError:
+        print("Table not found or empty.")
+        conn.close()
+        return 0
     
     # Count by location (CORRECTED: Joins AirQuality and Locations tables)
     cursor.execute("""
@@ -110,30 +116,25 @@ def show_database_stats():
     
     conn.close()
     return total
-#
-def get_or_create_location(cursor, city_name):
-    """Get location_id or create new location"""
-    cursor.execute("SELECT location_id FROM Locations WHERE city_name = ?", (city_name,))
-    result = cursor.fetchone()
-    if result:
-        return result[0]
-    cursor.execute("INSERT INTO Locations (city_name) VALUES (?)", (city_name,))
-    return cursor.lastrowid
 
 def store_air_quality_data():
     """Store up to 25 air quality records per run"""
     conn = sqlite3.connect('football_weather.db')
     cursor = conn.cursor()
     
-    cursor.execute("SELECT COUNT(*) FROM AirQuality")
-    actual_count = cursor.fetchone()[0]
+    try:
+        cursor.execute("SELECT COUNT(*) FROM AirQuality")
+        actual_count = cursor.fetchone()[0]
+    except sqlite3.OperationalError:
+        actual_count = 0
     
-    # Check existing (Joined with Locations)
+    # Check existing (Joined with Locations AND Dates)
     try:
         cursor.execute("""
-            SELECT a.game_date, l.city_name 
+            SELECT d.date_str, l.city_name 
             FROM AirQuality a 
             JOIN Locations l ON a.location_id = l.location_id
+            JOIN Dates d ON a.date_id = d.date_id
         """)
         existing = set(cursor.fetchall())
     except sqlite3.OperationalError:
@@ -194,12 +195,15 @@ def store_air_quality_data():
                     # 1. Get Location ID
                     loc_id = get_or_create_location(cursor, city)
 
-                    # 2. Insert using location_id
+                    # 2. Get Date ID
+                    date_id = get_or_create_date(cursor, date)
+
+                    # 3. INSERT using date_id
                     cursor.execute('''
                         INSERT INTO AirQuality 
-                        (game_date, location_id, pollutant_type, pollutant_value, unit)
+                        (date_id, location_id, pollutant_type, pollutant_value, unit)
                         VALUES (?, ?, ?, ?, ?)
-                    ''', (date, loc_id, 'US_AQI', avg_aqi, 'AQI'))
+                    ''', (date_id, loc_id, 'US_AQI', avg_aqi, 'AQI')) # FIXED: avg_aqi instead of aqi_value
                     
                     stored_count += 1
                     print(f"✓ AQI: {avg_aqi:.1f}")

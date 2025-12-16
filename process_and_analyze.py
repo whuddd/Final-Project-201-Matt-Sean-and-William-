@@ -1,5 +1,4 @@
 """process_and_analyze.py
-
 Load tables from `football_weather.db`, build a joined dataset, compute
 aggregations, and export CLEAN, READABLE CSV outputs to `outputs/`.
 """
@@ -11,11 +10,10 @@ from utils import connect_db, ensure_outputs_dir
 def load_data_with_sql_join(conn):
     """
     Load data using a massive SQL join. 
-    Note: We select specific columns to keep the dataframe clean from the start.
     """
     query = """
     SELECT 
-        g.game_date,
+        d.date_str as game_date,       -- JOINED from Dates table
         loc.city_name as stadium_city,
         t_home.team_name AS home_team_name,
         g.home_score,
@@ -28,12 +26,14 @@ def load_data_with_sql_join(conn):
         m.moon_illumination,
         m.moon_phase
     FROM Games g
+    JOIN Dates d ON g.date_id = d.date_id              -- JOIN DATES HERE
     JOIN Locations loc ON g.location_id = loc.location_id
     JOIN Teams t_home ON g.home_team_id = t_home.team_id
     JOIN Teams t_away ON g.away_team_id = t_away.team_id
-    LEFT JOIN Weather w ON g.game_date = w.game_date AND g.location_id = w.location_id
-    LEFT JOIN Moon_Data m ON g.game_date = m.game_date AND g.location_id = m.location_id
-    ORDER BY g.game_date DESC
+    -- Link using IDs now
+    LEFT JOIN Weather w ON g.date_id = w.date_id AND g.location_id = w.location_id
+    LEFT JOIN Moon_Data m ON g.date_id = m.date_id AND g.location_id = m.location_id
+    ORDER BY d.date_str DESC
     """
     return pd.read_sql_query(query, conn)
 
@@ -44,7 +44,7 @@ def compute_points_by_temperature_bins(joined: pd.DataFrame):
         df[temp_col] = np.nan
 
     bins = [-1e9, 39.9, 59.9, 79.9, 1e9]
-    labels = ['Below 40 F', '40-59 F', '60-79 F', '80+ F'] # More readable labels
+    labels = ['Below 40 F', '40-59 F', '60-79 F', '80+ F'] 
     df['temp_bin'] = pd.cut(df[temp_col].astype(float), bins=bins, labels=labels)
 
     agg = df.groupby('temp_bin', observed=True).agg(
@@ -141,10 +141,9 @@ def export_clean_csvs(joined, by_temp, by_wind, corr, by_moon, by_rain):
         'moon_illumination': 'Moon %',
         'moon_phase': 'Moon Phase'
     })
-    # Reorder for logic: Date -> Location -> Matchup -> Scores -> Weather
+    
     cols_order = ['Date', 'Stadium City', 'Home Team', 'Home Pts', 'Away Pts', 'Away Team', 
                   'Total Pts', 'Temp (F)', 'Wind (mph)', 'Precip (in)', 'Moon %', 'Moon Phase']
-    # Only keep columns that exist (in case moon_phase is missing)
     cols_final = [c for c in cols_order if c in joined_clean.columns]
     
     joined_clean[cols_final].to_csv('outputs/joined_dataset.csv', index=False)
@@ -162,8 +161,8 @@ def export_clean_csvs(joined, by_temp, by_wind, corr, by_moon, by_rain):
         wind_clean.columns = ['Wind Category', 'Weather Condition', 'Games Played', 'Avg Total Score']
         wind_clean = wind_clean.round(1)
         wind_clean.to_csv('outputs/points_by_wind_precip.csv', index=False)
-#
-    # 4. Correlation Matrix (Rename index/cols for humans)
+
+    # 4. Correlation Matrix
     if not corr.empty:
         corr_clean = corr.round(2)
         name_map = {
@@ -201,14 +200,12 @@ def main(save_csv=False):
 
     print(f"Loaded {len(joined)} games.")
 
-    # Compute stats
     by_temp = compute_points_by_temperature_bins(joined)
     by_wind = compute_points_by_wind_precip(joined)
     corr = compute_correlation_matrix(joined)
     by_moon = compute_points_by_moon_illumination(joined)
     by_rain = compute_win_pct_by_stadium_rain(joined)
 
-    # Export
     export_clean_csvs(joined, by_temp, by_wind, corr, by_moon, by_rain)
 
 if __name__ == '__main__':
