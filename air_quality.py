@@ -11,7 +11,6 @@ from utils import get_or_create_location, get_or_create_date
 
 # Cities matching football/weather/UV/Moon data (25 cities)
 CITIES = {
-    # Original 10 cities
     'Ann Arbor': {'lat': 42.2808, 'lon': -83.7430},
     'Columbus': {'lat': 40.0012, 'lon': -83.0302},
     'State College': {'lat': 40.7982, 'lon': -77.8599},
@@ -22,22 +21,16 @@ CITIES = {
     'Tuscaloosa': {'lat': 33.2098, 'lon': -87.5692},
     'Athens': {'lat': 33.9519, 'lon': -83.3576},
     'Baton Rouge': {'lat': 30.4515, 'lon': -91.1871},
-    
-    # Big Ten additions (11-15)
     'East Lansing': {'lat': 42.7370, 'lon': -84.4839},
     'Lincoln': {'lat': 40.8136, 'lon': -96.7026},
     'Champaign': {'lat': 40.1164, 'lon': -88.2434},
     'West Lafayette': {'lat': 40.4259, 'lon': -86.9081},
     'Bloomington': {'lat': 39.1653, 'lon': -86.5264},
-    
-    # SEC/Big 12 additions (16-20)
     'Knoxville': {'lat': 35.9606, 'lon': -83.9207},
     'Auburn': {'lat': 32.5990, 'lon': -85.4808},
     'College Station': {'lat': 30.6280, 'lon': -96.3344},
     'Starkville': {'lat': 33.4504, 'lon': -88.8184},
     'Columbia': {'lat': 34.0007, 'lon': -81.0348},
-    
-    # Additional major programs (21-25)
     'Gainesville': {'lat': 29.6516, 'lon': -82.3248},
     'Tallahassee': {'lat': 30.4383, 'lon': -84.2807},
     'Blacksburg': {'lat': 37.2296, 'lon': -80.4139},
@@ -87,7 +80,7 @@ def show_database_stats():
     conn = sqlite3.connect('football_weather.db')
     cursor = conn.cursor()
     
-    # Total count (Make sure your table is named 'AirQuality')
+    # Total count 
     try:
         cursor.execute("SELECT COUNT(*) FROM AirQuality")
         total = cursor.fetchone()[0]
