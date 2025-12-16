@@ -88,7 +88,7 @@ def store_moon_data():
     except sqlite3.OperationalError:
         actual_count = 0
     
-    # Check existing (Needs 3-way join now!)
+    # Check existing 
     try:
         cursor.execute("""
             SELECT d.date_str, l.city_name 
