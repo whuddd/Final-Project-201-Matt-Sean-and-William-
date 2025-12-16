@@ -15,38 +15,47 @@ def plot_temp_impact():
         print("❌ Missing points_by_temp.csv")
         return
 
-    # Filter empty bins. 
-    # MATCHING COLUMN NAME: 'Avg Total Score'
+    # Your actual columns:
+    # 'Temperature Range','Games Played','Avg Total Score','Lowest Score','Highest Score'
+    # Optionally rename for convenience
+    df = df.rename(columns={
+        'Temperature Range': 'Temperature Range',
+        'Games Played': 'Games Played',
+        'Avg Total Score': 'Avg Total Points',  # <-- key change
+    })
+
     df = df[df['Games Played'] > 0].copy().reset_index(drop=True)
 
     plt.figure(figsize=(10, 6))
     sns.set_theme(style="whitegrid")
 
     ax = sns.barplot(
-        data=df, 
-        x='Temperature Range',      
-        y='Avg Total Score',       # FIXED NAME
-        hue='Temperature Range', 
-        palette='RdBu_r', 
+        data=df,
+        x='Temperature Range',
+        y='Avg Total Points',      # now exists after rename
+        hue='Temperature Range',
+        palette='RdBu_r',
         edgecolor='black'
     )
 
     for i, row in df.iterrows():
-        height = row['Avg Total Score'] # FIXED NAME
+        height = row['Avg Total Points']
         count = int(row['Games Played'])
-        text_color = 'black' if i == 1 else 'white'
-        ax.text(i, height + 1, f'{height:.1f} pts', ha='center', fontweight='bold', color='black')
-        ax.text(i, height - 4, f'(n={count})', ha='center', color=text_color, fontweight='bold')
+        ax.text(i, height + 1, f'{height:.1f} pts', ha='center',
+                fontweight='bold', color='black')
+        ax.text(i, height - 4, f'(n={count})', ha='center',
+                color='black', fontweight='bold')
 
     plt.title('Impact of Temperature on Total Scoring', fontsize=14)
     plt.xlabel('Temperature (°F)', fontsize=12)
-    plt.ylabel('Average Total Score', fontsize=12)
-    plt.ylim(0, max(df['Avg Total Score']) * 1.2) # FIXED NAME
-    
+    plt.ylabel('Average Total Points', fontsize=12)
+    plt.ylim(0, max(df['Avg Total Points']) * 1.2)
+
     ensure_figures_dir()
     plt.savefig('figures/1_temperature_impact.png', dpi=300, bbox_inches='tight')
     plt.close()
     print("✅ Saved chart 1")
+
 
 # 2. WIND SPEED CHART
 def plot_wind_impact():
@@ -55,37 +64,47 @@ def plot_wind_impact():
     except FileNotFoundError:
         return
 
-    # MATCHING COLUMN NAMES: 'Wind Category', 'Avg Total Score'
+    # Rename to internal names used for plotting
+    df = df.rename(columns={
+        'Wind Category': 'Wind Category',
+        'Weather Condition': 'Weather Condition',
+        'Games Played': 'Games Played',
+        'Avg Total Score': 'Avg Total Points',
+    })
+
+    # Aggregate by wind category (ignore rain/dry for this plot)
     df_wind = df.groupby('Wind Category').agg({
-        'Avg Total Score': 'mean', 
+        'Avg Total Points': 'mean',
         'Games Played': 'sum'
     }).reset_index()
 
     plt.figure(figsize=(10, 6))
     ax = sns.barplot(
-        data=df_wind, 
-        x='Wind Category',         # FIXED NAME
-        y='Avg Total Score',       # FIXED NAME
-        hue='Wind Category',       # FIXED NAME
-        palette='viridis', 
+        data=df_wind,
+        x='Wind Category',
+        y='Avg Total Points',
+        hue='Wind Category',
+        palette='viridis',
         edgecolor='black'
     )
 
     for i, row in df_wind.iterrows():
-        height = row['Avg Total Score'] # FIXED NAME
+        height = row['Avg Total Points']
         count = int(row['Games Played'])
         if count > 0:
             ax.text(i, height + 0.5, f'{height:.1f}', ha='center', fontweight='bold')
-            ax.text(i, height - 3, f'n={count}', ha='center', color='white', fontsize=9)
+            ax.text(i, height - 3, f'n={count}', ha='center',
+                    color='white', fontsize=9)
 
     plt.title('Does Wind Speed Affect Scoring?', fontsize=14)
-    plt.xlabel('Wind Speed Category', fontsize=12)
-    plt.ylabel('Average Total Score', fontsize=12)
-    
+    plt.xlabel('Wind Category', fontsize=12)
+    plt.ylabel('Average Total Points', fontsize=12)
+
     ensure_figures_dir()
     plt.savefig('figures/2_wind_impact.png', dpi=300, bbox_inches='tight')
     plt.close()
     print("✅ Saved chart 2")
+
 
 # 3. RAIN SCORING (Box Plot)
 def plot_rain_scoring():
@@ -94,21 +113,39 @@ def plot_rain_scoring():
     except FileNotFoundError:
         return
 
-    # Create condition column from Precip column
-    # MATCHING COLUMN NAMES: 'Precip (in)', 'Total Pts'
-    df['Condition'] = df['Precip (in)'].apply(lambda x: 'Rain' if x > 0 else 'Dry')
+    # Your actual columns (from screenshot):
+    # 'Date','Stadium City','Home Team','Home Pts','Away Pts',
+    # 'Away Team','Total Pts','Temp (F)','Wind (mph)','Precip (in)',
+    # 'Moon %','Moon Phase'
+
+    # Create condition from Precip (in)
+    df['Condition'] = df['Precip (in)'].apply(
+        lambda x: 'Rain' if x > 0 else 'Dry'
+    )
 
     plt.figure(figsize=(8, 6))
-    sns.boxplot(data=df, x='Condition', y='Total Pts', palette=['skyblue', 'gray']) # FIXED NAME
-    sns.stripplot(data=df, x='Condition', y='Total Pts', color='black', alpha=0.3) # FIXED NAME
+    sns.boxplot(
+        data=df,
+        x='Condition',
+        y='Total Pts',          # <-- use this
+        palette=['skyblue', 'gray']
+    )
+    sns.stripplot(
+        data=df,
+        x='Condition',
+        y='Total Pts',
+        color='black',
+        alpha=0.3
+    )
 
     plt.title('Scoring Distribution: Rain vs. Dry Games', fontsize=14)
     plt.ylabel('Total Points Scored', fontsize=12)
-    
+
     ensure_figures_dir()
     plt.savefig('figures/3_rain_scoring_box.png', dpi=300, bbox_inches='tight')
     plt.close()
     print("✅ Saved chart 3")
+
 
 # 4. RAIN WIN PCT
 def plot_rain_win_pct():
@@ -117,13 +154,21 @@ def plot_rain_win_pct():
     except FileNotFoundError:
         return
 
-    # MATCHING COLUMN NAMES: 'Stadium', 'Home Win %', 'Condition'
+    # If you want nicer internal names you can rename, but it's optional
+    df = df.rename(columns={
+        'Stadium': 'Stadium',
+        'Condition': 'Condition',
+        'Total Games': 'Total Games',
+        'Home Wins': 'Home Wins',
+        'Home Win %': 'Home Win %'
+    })
+
     plt.figure(figsize=(14, 7))
     sns.barplot(
-        data=df, 
-        x='Stadium',      
-        y='Home Win %',   
-        hue='Condition',    # FIXED NAME (was 'Weather')
+        data=df,
+        x='Stadium',
+        y='Home Win %',
+        hue='Condition',   # matches CSV column
         palette={'Dry': '#4c7d9e', 'Rainy': '#c44e52'}
     )
 
@@ -133,11 +178,12 @@ def plot_rain_win_pct():
     plt.xticks(rotation=45, ha='right')
     plt.legend(title='Condition')
     plt.tight_layout()
-    
+
     ensure_figures_dir()
     plt.savefig('figures/4_rain_win_pct.png', dpi=300, bbox_inches='tight')
     plt.close()
     print("✅ Saved chart 4")
+
 
 # 5. CORRELATION
 def plot_correlation():

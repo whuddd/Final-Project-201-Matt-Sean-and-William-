@@ -1,17 +1,13 @@
 # moon_data.py
-# BONUS API #2 - Moon Phase Data Collection using IP Geolocation
-# Run this 4+ times to collect 100+ moon phase records
-
 import sqlite3
 import requests
 from datetime import datetime, timedelta
 import time
-# IMPORT THE NEW HELPERS
-from utils import get_or_create_date, get_or_create_location
+# IMPORT ALL 3 HELPERS
+from utils import get_or_create_date, get_or_create_location, get_or_create_moon_phase
 
 # Cities matching football/weather/AQ/UV data (25 cities)
 CITIES = {
-    # Original 10 cities
     'Ann Arbor': {'lat': 42.2808, 'lon': -83.7430},
     'Columbus': {'lat': 40.0012, 'lon': -83.0302},
     'State College': {'lat': 40.7982, 'lon': -77.8599},
@@ -22,22 +18,16 @@ CITIES = {
     'Tuscaloosa': {'lat': 33.2098, 'lon': -87.5692},
     'Athens': {'lat': 33.9519, 'lon': -83.3576},
     'Baton Rouge': {'lat': 30.4515, 'lon': -91.1871},
-    
-    # Big Ten additions (11-15)
     'East Lansing': {'lat': 42.7370, 'lon': -84.4839},
     'Lincoln': {'lat': 40.8136, 'lon': -96.7026},
     'Champaign': {'lat': 40.1164, 'lon': -88.2434},
     'West Lafayette': {'lat': 40.4259, 'lon': -86.9081},
     'Bloomington': {'lat': 39.1653, 'lon': -86.5264},
-    
-    # SEC/Big 12 additions (16-20)
     'Knoxville': {'lat': 35.9606, 'lon': -83.9207},
     'Auburn': {'lat': 32.5990, 'lon': -85.4808},
     'College Station': {'lat': 30.6280, 'lon': -96.3344},
     'Starkville': {'lat': 33.4504, 'lon': -88.8184},
     'Columbia': {'lat': 34.0007, 'lon': -81.0348},
-    
-    # Additional major programs (21-25)
     'Gainesville': {'lat': 29.6516, 'lon': -82.3248},
     'Tallahassee': {'lat': 30.4383, 'lon': -84.2807},
     'Blacksburg': {'lat': 37.2296, 'lon': -80.4139},
@@ -45,84 +35,36 @@ CITIES = {
     'Atlanta': {'lat': 33.7756, 'lon': -84.3963},
 }
 
-# Add this to your config.py
 IPGEOLOCATION_KEY = "2313acdb637c40db840995cd5da683ed"
 
 def get_moon_phase_from_api(lat, lon, date, city):
-    """
-    Get moon phase data from IP Geolocation Astronomy API
-    URL: https://api.ipgeolocation.io/v2/astronomy?apiKey={key}&location={location}&date={date}
-    """
     url = "https://api.ipgeolocation.io/v2/astronomy"
-    
-    # Format location as "City, State" or just city name
-    location = f"{city}, US"
-    
     params = {
         'apiKey': IPGEOLOCATION_KEY,
-        'location': location,
-        'date': date  # Format: YYYY-MM-DD
+        'location': f"{city}, US",
+        'date': date
     }
-    
     try:
         response = requests.get(url, params=params)
-        
         if response.status_code == 200:
             return response.json()
-        else:
-            print(f"    Error {response.status_code}")
-            return None
+        return None
     except Exception as e:
         print(f"    Exception: {e}")
         return None
 
-def create_moon_table():
-    """Create moon phase table if it doesn't exist"""
-    conn = sqlite3.connect('football_weather.db')
-    cursor = conn.cursor()
-    
-    # Drop old table if needed (optional, but good for resetting schema)
-    # cursor.execute("DROP TABLE IF EXISTS Moon_Data")
-
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Moon_Data (
-            moon_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date_id INTEGER,              -- UPDATED: Uses date_id instead of game_date string
-            location_id INTEGER,          
-            latitude REAL,
-            longitude REAL,
-            moon_phase TEXT,
-            moon_illumination REAL,
-            moonrise TEXT,
-            moonset TEXT,
-            moon_altitude REAL,
-            moon_azimuth REAL,
-            UNIQUE(date_id, location_id), -- UPDATED: Unique on IDs
-            FOREIGN KEY (date_id) REFERENCES Dates(date_id),
-            FOREIGN KEY (location_id) REFERENCES Locations(location_id)
-        )
-    ''')
-    
-    conn.commit()
-    conn.close()
-    print("✅ Moon_Data table created/verified")
-
 def show_database_stats():
-    """
-    Show current database statistics
-    """
     conn = sqlite3.connect('football_weather.db')
     cursor = conn.cursor()
-    
-    # Total count
     try:
         cursor.execute("SELECT COUNT(*) FROM Moon_Data")
         total = cursor.fetchone()[0]
     except sqlite3.OperationalError:
         print("Table not found or empty.")
+        conn.close()
         return 0
     
-    # Count by location
+    # Joins needed to verify data
     cursor.execute("""
         SELECT l.city_name, COUNT(*) 
         FROM Moon_Data m
@@ -132,28 +74,21 @@ def show_database_stats():
     """)
     by_location = cursor.fetchall()
     
-    print("\n" + "="*60)
-    print("DATABASE STATISTICS")
-    print("="*60)
-    print(f"Total moon records: {total}")
-    print("\nRecords by location:")
-    for location, count in by_location:
-        print(f"  {location}: {count}")
-    
+    print(f"\nTotal moon records: {total}")
     conn.close()
     return total
 
 def store_moon_data():
-    """Store up to 25 moon phase records per run"""
-    create_moon_table() # Ensure table exists
-    
     conn = sqlite3.connect('football_weather.db')
     cursor = conn.cursor()
     
-    cursor.execute("SELECT COUNT(*) FROM Moon_Data")
-    actual_count = cursor.fetchone()[0]
+    try:
+        cursor.execute("SELECT COUNT(*) FROM Moon_Data")
+        actual_count = cursor.fetchone()[0]
+    except sqlite3.OperationalError:
+        actual_count = 0
     
-    # Check existing (Joined with Locations AND Dates to get strings back)
+    # Check existing (Needs 3-way join now!)
     try:
         cursor.execute("""
             SELECT d.date_str, l.city_name 
@@ -163,15 +98,11 @@ def store_moon_data():
         """)
         existing = set(cursor.fetchall())
     except sqlite3.OperationalError:
-        # This handles cases where tables might not exist yet
         existing = set()
     
-    print(f"\n{'='*60}")
-    print(f"MOON PHASE DATA COLLECTION")
-    print(f"{'='*60}")
+    print(f"\nMOON PHASE DATA COLLECTION (Normalized)")
     print(f"Current records: {actual_count}")
     
-    # Generate Saturdays
     start_date = datetime(2024, 9, 1)
     end_date = datetime(2024, 11, 30)
     saturdays = []
@@ -188,7 +119,7 @@ def store_moon_data():
             if (date_str, city) not in existing:
                 all_combinations.append((date_str, city, coords))
     
-    print(f"New combinations available: {len(all_combinations)}")
+    print(f"New combinations: {len(all_combinations)}")
     
     stored_count = 0
     
@@ -203,14 +134,8 @@ def store_moon_data():
         
         if moon_data and 'astronomy' in moon_data:
             astronomy = moon_data['astronomy']
-            moon_phase = astronomy.get('moon_phase', 'Unknown')
+            moon_phase_str = astronomy.get('moon_phase', 'Unknown')
             moon_illumination = astronomy.get('moon_illumination_percentage')
-            moonrise = astronomy.get('moonrise', '-:-')
-            moonset = astronomy.get('moonset', '-:-')
-            moon_altitude = astronomy.get('moon_altitude')
-            moon_azimuth = astronomy.get('moon_azimuth')
-            
-            # Location info from API
             location_data = moon_data.get('location', {})
             returned_lat = location_data.get('latitude')
             returned_lon = location_data.get('longitude')
@@ -220,24 +145,23 @@ def store_moon_data():
                 except: moon_illumination = None
             
             try:
-                # 1. Get Location ID
+                # 1. Get IDs for Location and Date
                 loc_id = get_or_create_location(cursor, city)
-
-                # 2. Get Date ID (NEW STEP)
                 date_id = get_or_create_date(cursor, date)
 
-                # 3. Insert using IDs
+                # 2. Get ID for Moon Phase (NEW NORMALIZATION)
+                phase_id = get_or_create_moon_phase(cursor, moon_phase_str)
+
+                # 3. Insert IDs
                 cursor.execute('''
                     INSERT INTO Moon_Data 
-                    (date_id, location_id, latitude, longitude, moon_phase, 
-                     moon_illumination, moonrise, moonset, moon_altitude, moon_azimuth)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (date_id, loc_id, returned_lat, returned_lon, moon_phase,
-                      moon_illumination, moonrise, moonset, moon_altitude, moon_azimuth))
+                    (date_id, location_id, phase_id, latitude, longitude, moon_illumination)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ''', (date_id, loc_id, phase_id, returned_lat, returned_lon, moon_illumination))
                 
                 stored_count += 1
                 illum_str = f"{moon_illumination:.1f}%" if moon_illumination else "N/A"
-                print(f"✓ {moon_phase}, {illum_str}")
+                print(f"✓ {moon_phase_str}, {illum_str}")
                 
             except sqlite3.IntegrityError:
                 print(f"✗ Duplicate")
@@ -247,13 +171,7 @@ def store_moon_data():
         time.sleep(1)
     
     conn.commit()
-    cursor.execute("SELECT COUNT(*) FROM Moon_Data")
-    final_count = cursor.fetchone()[0]
     conn.close()
-    
-    print(f"\n{'='*60}")
-    print(f"Added: {stored_count}")
-    print(f"Total now: {final_count}")
     show_database_stats()
 
 if __name__ == '__main__':

@@ -21,7 +21,15 @@ def create_database():
         )
     ''')
 
-    # 3. Teams Table
+    # 3. MoonPhases Table (NEW!)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS MoonPhases (
+            phase_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            phase_name TEXT UNIQUE NOT NULL
+        )
+    ''')
+
+    # 4. Teams Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS Teams (
             team_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,7 +40,7 @@ def create_database():
         )
     ''')
 
-    # 4. Games Table
+    # 5. Games Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS Games (
             game_id INTEGER PRIMARY KEY,
@@ -51,7 +59,7 @@ def create_database():
         )
     ''')
 
-    # 5. Weather Table
+    # 6. Weather Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS Weather (
             weather_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -67,7 +75,7 @@ def create_database():
         )
     ''')
 
-    # 6. AirQuality Table
+    # 7. AirQuality Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS AirQuality (
             measure_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -81,29 +89,26 @@ def create_database():
         )
     ''')
 
-    # 7. Moon_Data Table (UPDATED WITH ALL COLUMNS)
+    # 8. Moon_Data Table (NORMALIZED & SIMPLIFIED)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS Moon_Data (
             moon_id INTEGER PRIMARY KEY AUTOINCREMENT,
             date_id INTEGER,
             location_id INTEGER,
+            phase_id INTEGER,             -- CHANGED: Uses ID now
             latitude REAL,
             longitude REAL,
-            moon_phase TEXT,
             moon_illumination REAL,
-            moonrise TEXT,          -- Added
-            moonset TEXT,           -- Added
-            moon_altitude REAL,     -- Added
-            moon_azimuth REAL,      -- Added
             UNIQUE(date_id, location_id),
             FOREIGN KEY (date_id) REFERENCES Dates(date_id),
-            FOREIGN KEY (location_id) REFERENCES Locations(location_id)
+            FOREIGN KEY (location_id) REFERENCES Locations(location_id),
+            FOREIGN KEY (phase_id) REFERENCES MoonPhases(phase_id)
         )
     ''')
     
     conn.commit()
     conn.close()
-    print("✅ Database created with COMPLETE schema!")
+    print("✅ Database created with NORMALIZED Moon Phases!")
 
 if __name__ == '__main__':
     create_database()

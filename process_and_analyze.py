@@ -2,18 +2,16 @@
 Load tables from `football_weather.db`, build a joined dataset, compute
 aggregations, and export CLEAN, READABLE CSV outputs to `outputs/`.
 """
+# process_and_analyze.py
 import argparse
 import pandas as pd
 import numpy as np
 from utils import connect_db, ensure_outputs_dir
 
 def load_data_with_sql_join(conn):
-    """
-    Load data using a massive SQL join. 
-    """
     query = """
     SELECT 
-        d.date_str as game_date,       -- JOINED from Dates table
+        d.date_str as game_date,
         loc.city_name as stadium_city,
         t_home.team_name AS home_team_name,
         g.home_score,
@@ -24,18 +22,25 @@ def load_data_with_sql_join(conn):
         w.wind_speed,
         w.precipitation,
         m.moon_illumination,
-        m.moon_phase
+        mp.phase_name as moon_phase   -- Get TEXT from MoonPhases table
     FROM Games g
-    JOIN Dates d ON g.date_id = d.date_id              -- JOIN DATES HERE
+    JOIN Dates d ON g.date_id = d.date_id
     JOIN Locations loc ON g.location_id = loc.location_id
     JOIN Teams t_home ON g.home_team_id = t_home.team_id
     JOIN Teams t_away ON g.away_team_id = t_away.team_id
-    -- Link using IDs now
     LEFT JOIN Weather w ON g.date_id = w.date_id AND g.location_id = w.location_id
     LEFT JOIN Moon_Data m ON g.date_id = m.date_id AND g.location_id = m.location_id
+    LEFT JOIN MoonPhases mp ON m.phase_id = mp.phase_id  -- Join new table
     ORDER BY d.date_str DESC
     """
     return pd.read_sql_query(query, conn)
+
+# ... (Keep the rest of your functions exactly the same) ...
+
+# To save space, just copy the rest of your existing process_and_analyze.py here.
+# The only change needed was the SQL query above.
+# I will provide the full file if you need it, but you likely just need to
+# swap the 'load_data_with_sql_join' function.
 
 def compute_points_by_temperature_bins(joined: pd.DataFrame):
     df = joined.copy()
