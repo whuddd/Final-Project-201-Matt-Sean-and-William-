@@ -1,0 +1,288 @@
+# football_data.py
+# William - College Football Data Collection
+# Run this 4+ times to collect 100+ games
+
+import sqlite3
+import requests
+from config import COLLEGE_FOOTBALL_KEY
+import time
+# IMPORT THE NEW HELPERS
+from utils import get_or_create_location, get_or_create_date  # <-- UPDATED IMPORT
+
+# Map EXACT stadium names to our weather cities (EXPANDED TO 25 STADIUMS)
+STADIUM_TO_CITY = {
+    'Michigan Stadium': 'Ann Arbor',
+    'Ohio Stadium': 'Columbus',
+    'Beaver Stadium': 'State College',
+    'Camp Randall Stadium': 'Madison',
+    'Kinnick Stadium': 'Iowa City',
+    'Autzen Stadium': 'Eugene',
+    'DKR-Texas Memorial Stadium': 'Austin',
+    'Bryant-Denny Stadium': 'Tuscaloosa',
+    'Sanford Stadium': 'Athens',
+    'Tiger Stadium (LA)': 'Baton Rouge',
+    'Spartan Stadium': 'East Lansing',
+    'Memorial Stadium (Lincoln, NE)': 'Lincoln',
+    'Memorial Stadium (Champaign, IL)': 'Champaign',
+    'Ross-Ade Stadium': 'West Lafayette',
+    'Memorial Stadium (Bloomington, IN)': 'Bloomington',
+    'Neyland Stadium': 'Knoxville',
+    'Jordan-Hare Stadium': 'Auburn',
+    'Kyle Field': 'College Station',
+    'Davis Wade Stadium': 'Starkville',
+    'Williams-Brice Stadium': 'Columbia',
+    'Ben Hill Griffin Stadium': 'Gainesville',  # Florida
+    'Doak Campbell Stadium': 'Tallahassee',  # Florida State
+    'Lane Stadium': 'Blacksburg',  # Virginia Tech
+    'Memorial Stadium (Clemson, SC)': 'Clemson',  # Clemson
+    'Bobby Dodd Stadium': 'Atlanta',  # Georgia Tech
+}
+
+# Note: get_or_create_location is now imported from utils, 
+# so we don't need to redefine it here unless you want to keep it local.
+# I removed it to use the one from utils.py to keep things clean.
+
+def get_or_create_team(cursor, team_name, conference="Unknown", location_id=None):
+    """Get team_id or create new team (avoids duplicate team names)"""
+    cursor.execute("SELECT team_id FROM Teams WHERE team_name = ?", (team_name,))
+    result = cursor.fetchone()
+    
+    if result:
+        return result[0]
+    else:
+        cursor.execute(
+            "INSERT INTO Teams (team_name, conference, location_id) VALUES (?, ?, ?)",
+            (team_name, conference, location_id)
+        )
+        return cursor.lastrowid
+
+def get_games_from_api(year=2024, week=1):
+    """Get games from CollegeFootballData API"""
+    url = "https://api.collegefootballdata.com/games"
+    
+    headers = {'Authorization': f'Bearer {COLLEGE_FOOTBALL_KEY}'}
+    params = {'year': year, 'week': week, 'seasonType': 'regular'}
+    
+    try:
+        response = requests.get(url, headers=headers, params=params)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print(f"  Error {response.status_code}")
+            return []
+    except Exception as e:
+        print(f"  Exception: {e}")
+        return []
+
+def get_city_from_venue(venue_name):
+    """Map venue/stadium name to our weather city"""
+    if not venue_name:
+        return None
+    
+    # --- ADD THIS FIX ---
+    # Baylor's stadium is "McLane Stadium". 
+    # We must ignore it so it doesn't match "Lane Stadium" (Blacksburg).
+    if "McLane" in venue_name:
+        return None
+    # --------------------
+
+    # Check if exact stadium name matches
+    if venue_name in STADIUM_TO_CITY:
+        return STADIUM_TO_CITY[venue_name]
+    
+    # Also check partial matches
+    for stadium, city in STADIUM_TO_CITY.items():
+        if stadium in venue_name:
+            return city
+    
+    return None
+
+def show_database_stats():
+    """Show current database statistics"""
+    conn = sqlite3.connect('football_weather.db')
+    cursor = conn.cursor()
+    
+    # Check tables exist first
+    try:
+        cursor.execute("SELECT COUNT(*) FROM Games")
+        total_games = cursor.fetchone()[0]
+        
+        cursor.execute("SELECT COUNT(*) FROM Teams")
+        total_teams = cursor.fetchone()[0]
+    except sqlite3.OperationalError:
+        print("Tables not ready yet.")
+        conn.close()
+        return 0
+    
+    # Updated to join with Locations table for readable stats
+    cursor.execute("""
+        SELECT l.city_name, COUNT(*) 
+        FROM Games g
+        JOIN Locations l ON g.location_id = l.location_id
+        GROUP BY l.city_name 
+        ORDER BY COUNT(*) DESC
+    """)
+    by_city = cursor.fetchall()
+    
+    print("\n" + "="*60)
+    print("DATABASE STATISTICS")
+    print("="*60)
+    print(f"Total games: {total_games}")
+    print(f"Total teams: {total_teams}")
+    
+    if by_city:
+        print("\nGames by city:")
+        for city, count in by_city:
+            print(f"  {city}: {count}")
+    
+    conn.close()
+    return total_games
+
+def store_football_data():
+    """Store up to 25 games per run from 2024 season"""
+    conn = sqlite3.connect('football_weather.db')
+    cursor = conn.cursor()
+    
+    # Ensure tables exist (count check)
+    try:
+        cursor.execute("SELECT COUNT(*) FROM Games")
+        actual_count = cursor.fetchone()[0]
+    except sqlite3.OperationalError:
+        actual_count = 0
+    
+    # Check existing IDs
+    try:
+        cursor.execute("SELECT game_id FROM Games")
+        existing_game_ids = set(row[0] for row in cursor.fetchall())
+    except sqlite3.OperationalError:
+        existing_game_ids = set()
+    
+    print(f"\n{'='*60}")
+    print(f"FOOTBALL DATA COLLECTION - 2024 SEASON")
+    print(f"{'='*60}")
+    print(f"Current games: {actual_count}")
+    print(f"Target stadiums: {len(STADIUM_TO_CITY)} stadiums")
+    print(f"{'='*60}\n")
+    
+    stored_count = 0
+    skipped_count = 0
+    no_score_count = 0
+    wrong_venue_count = 0
+    
+    for week in range(1, 15):
+        if stored_count >= 25:
+            print(f"\n✓ Reached 25-item limit")
+            break
+        
+        print(f"Week {week}...", end=" ")
+        games = get_games_from_api(2024, week)
+        
+        if not games:
+            print("No games")
+            continue
+        
+        # Count valid games
+        valid_games = 0
+        for g in games:
+            venue_name = g.get('venue', '')
+            city = get_city_from_venue(venue_name)
+            if city and g.get('homePoints') is not None:
+                valid_games += 1
+        
+        print(f"{len(games)} total, {valid_games} valid")
+        
+        for game in games:
+            if stored_count >= 25:
+                break
+            
+            game_id = game.get('id')
+            if game_id in existing_game_ids:
+                skipped_count += 1
+                continue
+            
+            # Get venue as string directly
+            venue_name = game.get('venue', '')
+            stadium_city = get_city_from_venue(venue_name)
+            
+            if not stadium_city:
+                wrong_venue_count += 1
+                continue
+            
+            # Get scores from top level
+            home_score = game.get('homePoints')
+            away_score = game.get('awayPoints')
+            
+            if home_score is None or away_score is None:
+                no_score_count += 1
+                continue
+            
+            # Get team info from top level
+            home_team = game.get('homeTeam', 'Unknown')
+            away_team = game.get('awayTeam', 'Unknown')
+            home_conference = game.get('homeConference', 'Unknown')
+            away_conference = game.get('awayConference', 'Unknown')
+            
+            # Extract game date
+            start_date = game.get('startDate', '')
+            game_date = start_date[:10]
+            kickoff_time = start_date[11:19] if len(start_date) >= 19 else None
+            attendance = game.get('attendance')
+
+            
+            # 1. Get the Location ID (Integer)
+            loc_id = get_or_create_location(cursor, stadium_city)
+
+            # 2. NEW: Get the Date ID (Integer) - THIS FIXES THE DUPLICATE STRING ISSUE
+            date_id = get_or_create_date(cursor, game_date)
+            
+            # 3. Get or create team IDs (Passing loc_id instead of string)
+            home_team_id = get_or_create_team(cursor, home_team, home_conference, loc_id)
+            away_team_id = get_or_create_team(cursor, away_team, away_conference, loc_id)
+            
+            # 4. Insert game using date_id instead of game_date
+            try:
+                cursor.execute('''
+                    INSERT INTO Games 
+                    (game_id, date_id, home_team_id, away_team_id, 
+                    home_score, away_score, location_id,
+                    attendance, kickoff_time)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    game_id, date_id, home_team_id, away_team_id,
+                    home_score, away_score, loc_id,
+                    attendance, kickoff_time
+                ))
+
+                stored_count += 1
+                print(f"  [{stored_count}] {game_date} ({stadium_city}): {home_team} {home_score}-{away_score} {away_team}")
+                
+            except sqlite3.IntegrityError:
+                skipped_count += 1
+        
+        time.sleep(0.3)
+    
+    conn.commit()
+    cursor.execute("SELECT COUNT(*) FROM Games")
+    final_count = cursor.fetchone()[0]
+    conn.close()
+    
+    print(f"\n{'='*60}")
+    print(f"COLLECTION COMPLETE")
+    print(f"{'='*60}")
+    print(f"Added: {stored_count}")
+    print(f"Skipped (duplicate): {skipped_count}")
+    print(f"Skipped (wrong venue): {wrong_venue_count}")
+    print(f"Skipped (no score): {no_score_count}")
+    print(f"Total games now: {final_count}")
+    
+    if final_count < 100:
+        runs_needed = ((100 - final_count) // 25) + 1
+        print(f"Need {runs_needed} more runs to reach 100")
+    else:
+        print("✅ 100+ games collected!")
+    
+    print(f"{'='*60}\n")
+    show_database_stats()
+
+if __name__ == '__main__':
+    store_football_data()
