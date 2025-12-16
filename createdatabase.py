@@ -108,7 +108,7 @@ def create_database():
     
     conn.commit()
     conn.close()
-    print("✅ Database created with NORMALIZED Moon Phases!")
+    print(" Database created with NORMALIZED Moon Phases!")
 
 if __name__ == '__main__':
     create_database()
