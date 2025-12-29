@@ -3,4 +3,4 @@ SI 201 final project analyzing how weather and air quality relate to college foo
 
 ## Project Report
 
-See [SI-201-Final-Project-Report.pdf](SI-201-Final-Project-Report.pdf) for full analysis, visualizations, and technical details.
+For detailed analysis, visualizations, and methodology, see the [full project report (PDF)](SI-201-Final-Project-Report.pdf).
